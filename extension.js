@@ -1,4 +1,17 @@
 const vscode = require('vscode');
+const workbenchConfig = vscode.workspace.getConfiguration('cocotools');
+var toolshed_path = workbenchConfig.get('toolshedpath');
+var lwtools_path = workbenchConfig.get('lwtoolspath');
+var emulator_path = workbenchConfig.get('emulatorpath');
+var disk_path = workbenchConfig.get('dskpath');
+const tools = require('./tools');
+
+function LoadOptions(){
+    toolshed_path = workbenchConfig.get('toolshedpath');
+    lwtools_path = workbenchConfig.get('lwtoolspath');
+    emulator_path = workbenchConfig.get('emulatorpath');
+    disk_path = workbenchConfig.get('dskpath');
+};
 
 class Bas_Line {
     // object to represent a line of basic code,
@@ -40,9 +53,8 @@ function GetNewLineNum(lines, original_line_num) {
 }
 
 function activate(context) {
-    
-
     let comment = vscode.commands.registerCommand('cocotools.comment', function () {
+        LoadOptions();
 
         let editor = vscode.window.activeTextEditor;
         if (!editor) {
@@ -73,62 +85,89 @@ function activate(context) {
     context.subscriptions.push(comment);
 
     let cocoemulator = vscode.commands.registerCommand('cocotools.cocoemulator', function () {
-        const workbenchConfig = vscode.workspace.getConfiguration('cocotools');
         let editor = vscode.window.activeTextEditor;
         if (!editor) {
             return; // No open text editor
         }
+        LoadOptions();
         editor.document.save();
 
-        //"decb copy -1 -a -t %%G -r %disk_path%,!filename!"
-        var toolshed_path =  "C:\\Users\\jpittman\\OneDrive\\CoCo\\TOOLS\\toolshed";
-        const emulator_path = workbenchConfig.get('emulatorpath');
-        var file_path = editor.document.fileName;
-        var file_name = file_path.substring(file_path.lastIndexOf("\\") + 1);
-        file_name = file_name.toUpperCase();
-        var disk_path = "C:\\Users\\jpittman\\OneDrive\\CoCo\\DATA_FILES\\DISKS\\JASON1.DSK";
-        var debc_command = toolshed_path + '\\decb.exe copy -1 -a -t "' + file_path + '" -r "' + disk_path + '",' + file_name;
+        var file_name = vscode.window.activeTextEditor.document.fileName
 
-        //run debc asyncronously...add .bas to .dsk and wait for exit
-        var debc = require('child_process');
-        debc.execSync(debc_command, function (err, stdout, stderr) {
-            if (err) {
-                console.error(err);
-                return;
-            }
-            console.log(stdout);
-            process.exit(0);
-        })
+        switch (file_name.substring(file_name.lastIndexOf(".")).toUpperCase()) {
+            case '.ASM':
+                var bin_path = file_name.substring(0, file_name.lastIndexOf(".")) + ".BIN";
+                var res = tools.BuildASM(file_name, lwtools_path);
+                if (res == 1)
+                    vscode.window.showInformationMessage('Build Succeeded!');
+                else
+                    vscode.window.showErrorMessage('Build Failed!');
 
-        //launch emulator
-        var childProcess = require('child_process');
-        childProcess.exec(emulator_path + ' ' + disk_path + '"', function (err, stdout, stderr) {
-            if (err) {
-                console.error(err);
-                return;
-            }
-            console.log(stdout);
-            process.exit(0);
-        })
-    }
-    );
+                var res = tools.CopyToDSK(bin_path, disk_path, toolshed_path, '-2 -b');
+                if (res == 1)
+                    vscode.window.showInformationMessage('File Added!');
+                else
+                    vscode.window.showErrorMessage('File Add Failed!');
+                break;
+            case '.BAS':
+                var res = tools.CopyToDSK(file_name, disk_path, toolshed_path, '-1 -a -t');
+                if (res == 1)
+                    vscode.window.showInformationMessage('File Added!');
+                else
+                    vscode.window.showErrorMessage('File Add Failed!');
+                break;
+        }
+
+        tools.LaunchEmulator(emulator_path, disk_path);
+    });
 
     context.subscriptions.push(cocoemulator);
 
-    function launch_decb(debc_cmd) {
-        this.execCommand = function (cmd, callback) {
-            exec(debc_cmd, (error, stdout, stderr) => {
-                if (error) {
-                    console.error(`exec error: ${error}`);
-                    return;
-                }
+    let cocoemulatorall = vscode.commands.registerCommand('cocotools.cocoemulatorall', function () {
+        LoadOptions();
+        var fs = require('fs');
+        var file_name = vscode.window.activeTextEditor.document.fileName
+        var input_dir = file_name.substring(0, file_name.lastIndexOf('\\'));
+        fs.readdirSync(input_dir).forEach(file => {
+            file = input_dir + '\\' + file;
+            switch (file.substring(file.lastIndexOf(".")).toUpperCase()) {
+                case '.ASM':
+                    var res = tools.BuildASM(file, lwtools_path);
+                    if (res == 1)
+                        vscode.window.showInformationMessage('Build Suceeded!');
+                    else
+                        vscode.window.showErrorMessage('Build Failed!');
+                    break;
+            }
+        });
 
-                callback(stdout);
-            });
-        }
-    }
+        fs.readdirSync(input_dir).forEach(file => {
+            file = input_dir + '\\' + file;
+            switch (file.substring(file.lastIndexOf(".")).toUpperCase()) {
+                case '.BAS':
+                    var res = tools.CopyToDSK(file, disk_path, toolshed_path, '-1 -a -t');
+                    if (res == 1)
+                        vscode.window.showInformationMessage('File Added!');
+                    else
+                        vscode.window.showErrorMessage('File Add Failed!');
+                    break;
+                case '.BIN':
+                    var res = tools.CopyToDSK(file, disk_path, toolshed_path, '-2 -b');
+                    if (res == 1)
+                        vscode.window.showInformationMessage('File Added!');
+                    else
+                        vscode.window.showErrorMessage('File Add Failed!');
+                    break;
+            }
+        });
+
+        tools.LaunchEmulator(emulator_path, disk_path);
+    });
+
+    context.subscriptions.push(cocoemulatorall);
 
     let renumber = vscode.commands.registerCommand('cocotools.renumber', function () {
+        LoadOptions();
         let editor = vscode.window.activeTextEditor;
         if (!editor) {
             return; // No open text editor
@@ -170,10 +209,23 @@ function activate(context) {
             }
         });
 
+        linelist.forEach(line => {
+            let goto = line.line_str.indexOf("GOSUB");
+            if (goto > -1) {
+                let gonum = line.line_str.match(/GOSUB \d+/)[0];
+                if (gonum.length > 0) {
+                    let line_num = gonum.match(/\d+/)[0];
+                    let new_num = GetNewLineNum(linelist, line_num);
+                    let newgonum = gonum.replace(line_num, new_num);
+                    line.line_str = line.line_str.replace(gonum, newgonum);
+                }
+            }
+        });
+
         for (ls = 0; ls < linelist.length; ls++) {
             let line = editor.document.lineAt(ls);
             if (line.text.trimRight().length > 0) {
-                console.log("LINE: " + linelist[ls].new_str);
+                //console.log("LINE: " + linelist[ls].new_str);
                 edit.replace(editor.document.uri, line.range, linelist[ls].new_str);
             }
         }
@@ -186,6 +238,8 @@ function activate(context) {
     context.subscriptions.push(renumber);
 }
 exports.activate = activate;
+
+
 
 function deactivate() {
 }

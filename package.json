@@ -3,6 +3,7 @@
     "displayName": "COCOTools",
     "description": "Tools to help you develop in BASIC for the Tandy color Computer in a modern IDE",
     "version": "0.0.1",
+    "icon": "images/icon.png",
     "engines": {
         "vscode": "^1.29.0"
     },
@@ -11,7 +12,8 @@
     ],
     "activationEvents": [
         "onCommand:cocotools.renumber",
-        "onCommand:cocotools.cocoemulator"
+        "onCommand:cocotools.cocoemulator",
+        "onCommand:cocotools.cocoemulatorall"
     ],
     "main": "./extension",
     "contributes": {
@@ -31,6 +33,10 @@
             {
                 "command": "cocotools.cocoemulator",
                 "title": "COCO Emulator"
+            },
+            {
+                "command": "cocotools.cocoemulatorall",
+                "title": "COCO Emulator - All Files in Current Dir"
             }
         ],
         "configuration": {
@@ -51,6 +57,21 @@
                     "type": "string",
                     "default": "",
                     "description": "Disk Image Path"
+                },
+                "cocotools.lwtoolspath": {
+                    "type": "string",
+                    "default": "",
+                    "description": "LWTOOLS Path"
+                },
+                "cocotools.autonumber": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Automatically add new line numbers"
+                },
+                "cocotools.autorenumber": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Automatically Renumber"
                 }
             }
         }
