@@ -2,7 +2,7 @@ const vscode = require('vscode');
 const workbenchConfig = vscode.workspace.getConfiguration('cocotools');
 
 var emulator_path = workbenchConfig.get('emulatorPath');
-var emulator_flags = workbenchConfig.get('emulatorflags');
+var emulator_flags = workbenchConfig.get('emulatorFlags');
 var toolshed_path = workbenchConfig.get('toolshedPath');
 var toolshed_add_flags = workbenchConfig.get('toolshedAddFileFlags');
 var toolshed_create_flags = workbenchConfig.get('toolshedCreateDiskFlags');
@@ -13,10 +13,13 @@ var disk_path = workbenchConfig.get('diskPath');
 var lwtools_path = workbenchConfig.get('lwtoolsExecutablePath');
 var lwtools_flags = workbenchConfig.get('lwtoolsFlags');
 
-var emulator_flags = workbenchConfig.get('emulatorflags');
-var emulator_flags = workbenchConfig.get('emulatorflags');
+// var emulator_flags = workbenchConfig.get('emulatorflags');
+// var emulator_flags = workbenchConfig.get('emulatorflags');
 
 const tools = require('./tools');
+
+// mame coco3 -menu -skip_gameinfo -window -flop1 [DSK_path] -autoboot_delay 1 -autoboot_command "\nLOADM"[file_name]":EXEC\n"
+
 
 function LoadOptions(){
     // toolshed_path = workbenchConfig.get('toolshedpath');
@@ -122,9 +125,22 @@ function activate(context) {
                 }
                 else
                     vscode.window.showErrorMessage('Build Failed!');
-
-
                 break;
+            case '.C':
+                    var bin_path = file_name.substring(0, file_name.lastIndexOf(".")) + ".BIN";
+                    var res = tools.BuildC(file_name, cmoc_path, cmoc_flags, false);
+                    if (res == 1)
+                    {
+                        vscode.window.showInformationMessage('Build Suceeded!');
+                        var res = tools.CopyToDSK(bin_path, disk_path, toolshed_path, toolshed_add_flags, ' -2 -b');
+                        if (res == 1)
+                            vscode.window.showInformationMessage('File Added!');
+                        else
+                            vscode.window.showErrorMessage('File Add Failed!');
+                    }
+                    else
+                        vscode.window.showErrorMessage('Build Failed!');
+                    break;
             case '.BAS':
                 var res = tools.CopyToDSK(file_name, disk_path, toolshed_path, '-1 -a -t');
                 if (res == 1)
@@ -134,7 +150,7 @@ function activate(context) {
                 break;
         }
 
-        tools.LaunchEmulator(emulator_path, disk_path);
+        tools.LaunchEmulator(emulator_path, disk_path, emulator_flags, file_name);
     });
 
     context.subscriptions.push(cocoemulator);
@@ -184,7 +200,7 @@ function activate(context) {
             }
         });
 
-        tools.LaunchEmulator(emulator_path, disk_path);
+        tools.LaunchEmulator(emulator_path, disk_path, emulator_flags, file_name);
     });
 
     context.subscriptions.push(cocoemulatorall);

@@ -40,7 +40,10 @@ module.exports = {
       var bin_path = friendly_path + ".BIN";
       var source_path = friendly_path + ".c";
 
-      var cmoc_command = cmoc_path + ' -o "' + bin_path + '" "' + source_path + '"';
+      cmoc_flags = cmoc_flags.replace("[output_path]", bin_path);
+      cmoc_flags = cmoc_flags.replace("[input_path]", source_path);
+
+      var cmoc_command = cmoc_path + ' ' + cmoc_flags;
 
       var buildProcess = require('child_process');
       buildProcess.execSync(cmoc_command, { maxBuffer: 1024 * 500 }, function (err, stdout, stderr) {
@@ -57,10 +60,10 @@ module.exports = {
   },
   CopyToDSK: function (file_path, DSK_path, toolshed_path, toolshed_flags, file_options) {
     try {
-    if(!toolshed_path.endsWith("\\"))
-      toolshed_path += "\\";
+    if(!toolshed_path.endsWith("/"))
+      toolshed_path += "/";
 
-      var file_name = file_path.substring(file_path.lastIndexOf("\\") + 1);
+      var file_name = file_path.substring(file_path.lastIndexOf("/") + 1);
       file_name = file_name.toUpperCase();
       
       //var debc_command = toolshed_path + '\\decb.exe copy ' + opts + ' "' + file_path + '" -r "' + DSK_path + '",' + file_name;
@@ -87,10 +90,14 @@ module.exports = {
     }
     return 1;
   },
-  LaunchEmulator: function (emulator_path, disk_path) {
+  LaunchEmulator: function (emulator_path, disk_path, emulator_flags, file_name) {
+    emulator_flags = emulator_flags.replace("[DSK_path]", disk_path);
+    emulator_flags = emulator_flags.replace("[file_name]", "A.BIN");
+    var run_path = emulator_path + ' ' + emulator_flags;
+
     var childProcess = require('child_process');
     try {
-      childProcess.exec(emulator_path , function (err, stdout, stderr) {
+      childProcess.exec(run_path , function (err, stdout, stderr) {
         //+ ' ' + disk_path
         if (err) {
           console.error(err);
