@@ -1,7 +1,9 @@
 {
     "name": "cocotools",
+    "publisher": "jasonpittman",
+    "author": "Jason Pittman",
     "displayName": "COCOTools",
-    "description": "Tools to help you develop in BASIC for the Tandy color Computer in a modern IDE",
+    "description": "Tools to help you develop in BASIC/C/ASM for the Tandy color Computer in a modern IDE",
     "version": "0.0.1",
     "icon": "images/icon.png",
     "engines": {
@@ -12,6 +14,8 @@
     ],
     "activationEvents": [
         "onCommand:cocotools.renumber",
+        "onCommand:cocotools.comment",
+        "onCommand:cocotools.uncommnet",
         "onCommand:cocotools.cocoemulator",
         "onCommand:cocotools.cocoemulatorall"
     ],
@@ -41,37 +45,77 @@
         ],
         "configuration": {
             "type": "object",
-            "title": "CoCo BASIC Tools",
+            "title": "CoCo Tools",
             "properties": {
-                "cocotools.emulatorpath": {
+                "cocotools.emulatorPath": {
                     "type": "string",
                     "default": "",
-                    "description": "Emulator Path"
+                    "description": "Path to launch your chosen emulator. (VCC or MAME)"
                 },
-                "cocotools.toolshedpath": {
+                "cocotools.emulatorFlags": {
                     "type": "string",
                     "default": "",
-                    "description": "Toolshed Path"
+                    "description": "Command line arguments to pass to the emulator on launch"
                 },
-                "cocotools.dskpath": {
+                "cocotools.toolshedPath": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Path to Toolshed directory"
+                },
+                "cocotools.toolshedAddFileFlags": {
+                    "type": "string",
+                    "default": "decb copy '[file_path]' -r '[DSK_path]' '[file_name]'",
+                    "description": "Flags to add a file to a .dsk in Toolshed"
+                },
+                "cocotools.toolshedCreateDiskFlags": {
+                    "type": "string",
+                    "default": "decb dskini '[DSK_path]'",
+                    "description": "Flags to create a new .dsk in Toolshed"
+                },
+                "cocotools.cmocExecutablePath": {
+                    "type": "string",
+                    "default": "",
+                    "description": "CMOC Path"
+                },
+                "cocotools.cmocFlags": {
+                    "type": "string",
+                    "default": "-o [output_path] [input_path]",
+                    "description": "Flags sent to CMOC when c file is compiled"
+                },
+                "cocotools.cmocCygwin": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "If CMOC is installed in CYGWIN (Windows), paths will need to be remapped\r\nso CMOC can access files from CYGWIN.\r\n\r\nFor example, \"C:\\Test\\stuff.c\" will need to me remapped to \"\\\\cygwin\\c\\Test\\Stuff.c\""
+                },
+                "cocotools.diskPath": {
                     "type": "string",
                     "default": "",
                     "description": "Disk Image Path"
                 },
-                "cocotools.lwtoolspath": {
+                "cocotools.lwtoolsExecutablePath": {
                     "type": "string",
                     "default": "",
-                    "description": "LWTOOLS Path"
+                    "description": "Path to the LWTOOLS executable"
                 },
-                "cocotools.autonumber": {
+                "cocotools.lwtoolsFlags": {
+                    "type": "string",
+                    "default": "[input_path] --6809 --list --symbols --6800compat --output=[output_path] --format=decb",
+                    "description": "Command-Line arguments for LWTOOLS"
+                },
+                "cocotools.autoNumber": {
                     "type": "boolean",
                     "default": false,
                     "description": "Automatically add new line numbers"
                 },
-                "cocotools.autorenumber": {
+                "cocotools.renumberIncrement": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Line number increment to use when renumbering BASIC"
+                },
+                "cocotools.recreateDskOnEachBuild": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Automatically Renumber"
+                    "description": "Creates a new disk image each time an emulator is launched.\r\nIf not selected, files will be replaced on the existing disk image."
                 }
             }
         }

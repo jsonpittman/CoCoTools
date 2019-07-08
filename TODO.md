@@ -8,3 +8,6 @@ Options:
 - Auto line numbers
 - Auto Renum
 - Line number increment
+- emulator flags
+- lwtools flags
+- cmoc flags

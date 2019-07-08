@@ -1,6 +1,6 @@
 # renum README
 
-This is the README for your extension "renum". After writing up a brief description, we recommend including the following sections.
+CoCoTools is a VS Code extension that does some cool stuff.
 
 ## Features
 

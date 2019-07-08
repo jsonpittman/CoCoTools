@@ -1,16 +1,29 @@
 const vscode = require('vscode');
 const workbenchConfig = vscode.workspace.getConfiguration('cocotools');
-var toolshed_path = workbenchConfig.get('toolshedpath');
-var lwtools_path = workbenchConfig.get('lwtoolspath');
-var emulator_path = workbenchConfig.get('emulatorpath');
-var disk_path = workbenchConfig.get('dskpath');
+
+var emulator_path = workbenchConfig.get('emulatorPath');
+var emulator_flags = workbenchConfig.get('emulatorflags');
+var toolshed_path = workbenchConfig.get('toolshedPath');
+var toolshed_add_flags = workbenchConfig.get('toolshedAddFileFlags');
+var toolshed_create_flags = workbenchConfig.get('toolshedCreateDiskFlags');
+var cmoc_path = workbenchConfig.get('cmocExecutablePath');
+var cmoc_flags = workbenchConfig.get('cmocFlags');
+var cmoc_cygwin = workbenchConfig.get('cmocCygwin');
+var disk_path = workbenchConfig.get('diskPath');
+var lwtools_path = workbenchConfig.get('lwtoolsExecutablePath');
+var lwtools_flags = workbenchConfig.get('lwtoolsFlags');
+
+var emulator_flags = workbenchConfig.get('emulatorflags');
+var emulator_flags = workbenchConfig.get('emulatorflags');
+
 const tools = require('./tools');
 
 function LoadOptions(){
-    toolshed_path = workbenchConfig.get('toolshedpath');
-    lwtools_path = workbenchConfig.get('lwtoolspath');
-    emulator_path = workbenchConfig.get('emulatorpath');
-    disk_path = workbenchConfig.get('dskpath');
+    // toolshed_path = workbenchConfig.get('toolshedpath');
+    // lwtools_path = workbenchConfig.get('lwtoolspath');
+    // emulator_path = workbenchConfig.get('emulatorpath');
+    // disk_path = workbenchConfig.get('dskpath');
+    // emulator_flags = workbenchConfig.get('emulatorflags');
 };
 
 class Bas_Line {
@@ -97,17 +110,20 @@ function activate(context) {
         switch (file_name.substring(file_name.lastIndexOf(".")).toUpperCase()) {
             case '.ASM':
                 var bin_path = file_name.substring(0, file_name.lastIndexOf(".")) + ".BIN";
-                var res = tools.BuildASM(file_name, lwtools_path);
+                var res = tools.BuildASM(file_name, lwtools_path, lwtools_flags);
                 if (res == 1)
+                {
                     vscode.window.showInformationMessage('Build Succeeded!');
+                    var res = tools.CopyToDSK(bin_path, disk_path, toolshed_path, toolshed_add_flags, ' -2 -b');
+                    if (res == 1)
+                        vscode.window.showInformationMessage('File Added!');
+                    else
+                        vscode.window.showErrorMessage('File Add Failed!');
+                }
                 else
                     vscode.window.showErrorMessage('Build Failed!');
 
-                var res = tools.CopyToDSK(bin_path, disk_path, toolshed_path, '-2 -b');
-                if (res == 1)
-                    vscode.window.showInformationMessage('File Added!');
-                else
-                    vscode.window.showErrorMessage('File Add Failed!');
+
                 break;
             case '.BAS':
                 var res = tools.CopyToDSK(file_name, disk_path, toolshed_path, '-1 -a -t');
@@ -133,6 +149,13 @@ function activate(context) {
             switch (file.substring(file.lastIndexOf(".")).toUpperCase()) {
                 case '.ASM':
                     var res = tools.BuildASM(file, lwtools_path);
+                    if (res == 1)
+                        vscode.window.showInformationMessage('Build Suceeded!');
+                    else
+                        vscode.window.showErrorMessage('Build Failed!');
+                    break;
+                case '.C':
+                    var res = tools.BuildC(file, cmoc_path);
                     if (res == 1)
                         vscode.window.showInformationMessage('Build Suceeded!');
                     else
