@@ -50,15 +50,10 @@ module.exports = {
       var cmoc_command = cmoc_path + ' ' + cmoc_flags;
 
       var buildProcess = require('child_process');
-      buildProcess.execSync(cmoc_command, { maxBuffer: 1024 * 500 }, function (err, stdout, stderr) {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        console.log(stdout);
-      })
+      buildProcess.execSync(cmoc_command);
     } catch (exc) {
-      vscode.window.showErrorMessage(exc.message);
+      const vscode = require('vscode');
+      vscode.window.showErrorMessage(exc.stdout.toString());
       return 0;
     }
     return 1;
@@ -78,22 +73,15 @@ module.exports = {
 
 
       var buildProcess = require('child_process');
-      buildProcess.execSync(toolshed_command, { maxBuffer: 1024 * 500 }, function (err, stdout, stderr) {
-        if (err) {
-          console.error(err);
-          return 0;
-        }
-        return 1;
-      });
+      buildProcess.execSync(toolshed_command);
     }
-    catch (ex) {
+    catch (exc) {
       var vscode = require('vscode');
-      vscode.window.showErrorMessage("Error Creating DSK file.");
+      vscode.window.showErrorMessage("Error Creating DSK: " + exc.stdout.toString());
       return 0;
     }
   },
   CopyToDSK: function (file_path, DSK_path, toolshed_path, toolshed_flags, file_options) {
-    var vscode = require('vscode');
     var path = require('path');
 
     try {
@@ -114,39 +102,31 @@ module.exports = {
       var debc_command = '"' + path.join(toolshed_path, "decb") + '" ' + toolshed_flags;
 
       var debc = require('child_process');
-      debc.execSync(debc_command, function (err, stdout, stderr) {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        console.log(stdout);
-        process.exit(0);
-      })
+      debc.execSync(debc_command);
     }
     catch (exc) {
-      console.log(exc);
+    var vscode = require('vscode');
+      vscode.window.showErrorMessage("Error copying to DSK: " + exc.stdout.toString());
       return 0;
     }
     return 1;
   },
   LaunchEmulator: function (emulator_path, disk_path, emulator_flags, file_name) {
     emulator_flags = emulator_flags.replace("[DSK_path]", disk_path);
-    emulator_flags = emulator_flags.replace("[file_name]", "A.BIN");
+    // if(file_name.length > 0 && emulator_flags.length > 0)
+    //   if(file_name.toUpperCase().endsWith('.BIN'))
+    //     emulator_flags += ' -autoboot_command "\nLOADM\"' + file_name + '\":EXEC\n"';
+    //   else if(file_name.toUpperCase().endsWith('.BAS'))
+    //     emulator_flags += ' -autoboot_delay 1 -autoboot_command "LOAD\"' + file_name + '\":RUN';
     var run_path = emulator_path + ' ' + emulator_flags;
+
 
     var childProcess = require('child_process');
     try {
-      childProcess.exec(run_path, function (err, stdout, stderr) {
-        //+ ' ' + disk_path
-        if (err) {
-          console.error(err);
-          return;
-        }
-        console.log(stdout);
-        process.exit(0);
-      })
+      childProcess.exec(run_path);
     } catch (exc) {
-      console.log(exc);
+      var vscode = require('vscode');
+      vscode.window.showErrorMessage("Error launching emulator: " + exc.stdout.toString());
     }
   }
 };

@@ -111,15 +111,18 @@ function activate(context) {
         }
         LoadOptions();
         editor.document.save();
+        var error = false;
 
         var file_name = vscode.window.activeTextEditor.document.fileName
 
         if(recreateDskOnEachBuild)
             tools.CreateDSK(disk_path, toolshed_path, toolshed_create_flags);
 
+        var bin_path;
+
         switch (path.extname(file_name).toUpperCase()) {
             case '.ASM':
-                var bin_path = file_name.substring(0, file_name.lastIndexOf(".")) + ".BIN";
+                bin_path = file_name.substring(0, file_name.lastIndexOf(".")) + ".BIN";
                 var res = tools.BuildASM(file_name, lwtools_path, lwtools_flags);
                 if (res == 1) {
                     vscode.window.showInformationMessage('Build Succeeded!');
@@ -133,21 +136,27 @@ function activate(context) {
                     vscode.window.showErrorMessage('Build Failed!');
                 break;
             case '.C':
-                var bin_path = file_name.substring(0, file_name.lastIndexOf(".")) + ".BIN";
+                bin_path = file_name.substring(0, file_name.lastIndexOf(".")) + ".BIN";
                 var res = tools.BuildC(file_name, cmoc_path, cmoc_flags, false);
-                if (res == 1) {
-                    vscode.window.showInformationMessage('Build Suceeded!');
-                    var res = tools.CopyToDSK(bin_path, disk_path, toolshed_path, toolshed_add_flags, toolshed_add_bin_options);
-                    if (res == 1)
-                        vscode.window.showInformationMessage('File Added!');
-                    else
-                        vscode.window.showErrorMessage('File Add Failed!');
+                if(res==0)
+                {
+                    error=true;
+                    break;
                 }
-                else
-                    vscode.window.showErrorMessage('Build Failed!');
-                break;
+                // if (res == 1) {
+                //     vscode.window.showInformationMessage('Build Suceeded!');
+                //     var res = tools.CopyToDSK(bin_path, disk_path, toolshed_path, toolshed_add_flags, toolshed_add_bin_options);
+                //     if (res == 1)
+                //         vscode.window.showInformationMessage('File Added!');
+                //     else
+                //         vscode.window.showErrorMessage('File Add Failed!');
+                // }
+                // else
+                //     vscode.window.showErrorMessage('Build Failed!');
+                // break;
             case '.BAS':
                 var res = tools.CopyToDSK(file_name, disk_path, toolshed_path, toolshed_add_flags, toolshed_add_basic_options);
+                bin_path = file_name.substring(0, file_name.lastIndexOf(".")) + ".BAS";
                 if (res == 1)
                     vscode.window.showInformationMessage('File Added!');
                 else
@@ -155,7 +164,8 @@ function activate(context) {
                 break;
         }
 
-        tools.LaunchEmulator(emulator_path, disk_path, emulator_flags, file_name);
+        if(!error)
+            tools.LaunchEmulator(emulator_path, disk_path, emulator_flags, path.basename(bin_path));
     });
 
     context.subscriptions.push(cocoemulator);
@@ -172,8 +182,12 @@ function activate(context) {
                 error = true;
         }
 
+        var dir_tail = "\\";
+        if (file_name.startsWith('/'))
+            dir_tail = "/"; // UNIX path
+
         if (!error) {
-            var input_dir = path.dirname(file_name) + '\\';
+            var input_dir = path.dirname(file_name) + dir_tail;
             fs.readdirSync(input_dir).forEach(file => {
                 //var orig_file_name = file;
                 file = input_dir + file;
@@ -195,7 +209,7 @@ function activate(context) {
                     // }
                     // break;
                     case '.C':
-                        var res = tools.BuildC(file, cmoc_path);
+                        var res = tools.BuildC(file, cmoc_path, cmoc_flags, cmoc_cygwin);
                         // if (res == 1)
                         //     vscode.window.showInformationMessage(orig_file_name + ': Build Suceeded!');
                         // else
@@ -246,7 +260,7 @@ function activate(context) {
         }
 
         if (!error) {
-            tools.LaunchEmulator(emulator_path, disk_path, emulator_flags, file_name);
+            tools.LaunchEmulator(emulator_path, disk_path, emulator_flags);
         }
     });
 
