@@ -64,7 +64,7 @@
                 },
                 "cocotools.toolshedAddFileFlags": {
                     "type": "string",
-                    "default": "copy '[file_path]' -r '[DSK_path]' '[file_name]'",
+                    "default": "copy [file_opts] '[file_path]' -r '[DSK_path]' '[file_name]'",
                     "description": "decb Flags to add a file to a .dsk in Toolshed"
                 },
                 "cocotools.toolshedAddBasicFileOptions": {

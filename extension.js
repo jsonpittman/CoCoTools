@@ -114,6 +114,9 @@ function activate(context) {
 
         var file_name = vscode.window.activeTextEditor.document.fileName
 
+        if(recreateDskOnEachBuild)
+            tools.CreateDSK(disk_path, toolshed_path, toolshed_create_flags);
+
         switch (path.extname(file_name).toUpperCase()) {
             case '.ASM':
                 var bin_path = file_name.substring(0, file_name.lastIndexOf(".")) + ".BIN";
