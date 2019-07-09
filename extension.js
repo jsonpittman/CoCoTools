@@ -12,16 +12,20 @@ var cmoc_cygwin = workbenchConfig.get('cmocCygwin');
 var disk_path = workbenchConfig.get('diskPath');
 var lwtools_path = workbenchConfig.get('lwtoolsExecutablePath');
 var lwtools_flags = workbenchConfig.get('lwtoolsFlags');
+var recreateDskOnEachBuild = workbenchConfig.get('recreateDskOnEachBuild');
+var toolshed_add_basic_options = workbenchConfig.get('toolshedAddBasicFileOptions');
+var toolshed_add_bin_options = workbenchConfig.get('toolshedAddBinFileOptions');
 
 // var emulator_flags = workbenchConfig.get('emulatorflags');
 // var emulator_flags = workbenchConfig.get('emulatorflags');
 
 const tools = require('./tools');
+const path = require('path');
 
 // mame coco3 -menu -skip_gameinfo -window -flop1 [DSK_path] -autoboot_delay 1 -autoboot_command "\nLOADM"[file_name]":EXEC\n"
 
 
-function LoadOptions(){
+function LoadOptions() {
     // toolshed_path = workbenchConfig.get('toolshedpath');
     // lwtools_path = workbenchConfig.get('lwtoolspath');
     // emulator_path = workbenchConfig.get('emulatorpath');
@@ -110,14 +114,13 @@ function activate(context) {
 
         var file_name = vscode.window.activeTextEditor.document.fileName
 
-        switch (file_name.substring(file_name.lastIndexOf(".")).toUpperCase()) {
+        switch (path.extname(file_name).toUpperCase()) {
             case '.ASM':
                 var bin_path = file_name.substring(0, file_name.lastIndexOf(".")) + ".BIN";
                 var res = tools.BuildASM(file_name, lwtools_path, lwtools_flags);
-                if (res == 1)
-                {
+                if (res == 1) {
                     vscode.window.showInformationMessage('Build Succeeded!');
-                    var res = tools.CopyToDSK(bin_path, disk_path, toolshed_path, toolshed_add_flags, ' -2 -b');
+                    var res = tools.CopyToDSK(bin_path, disk_path, toolshed_path, toolshed_add_flags, toolshed_add_bin_options);
                     if (res == 1)
                         vscode.window.showInformationMessage('File Added!');
                     else
@@ -127,22 +130,21 @@ function activate(context) {
                     vscode.window.showErrorMessage('Build Failed!');
                 break;
             case '.C':
-                    var bin_path = file_name.substring(0, file_name.lastIndexOf(".")) + ".BIN";
-                    var res = tools.BuildC(file_name, cmoc_path, cmoc_flags, false);
+                var bin_path = file_name.substring(0, file_name.lastIndexOf(".")) + ".BIN";
+                var res = tools.BuildC(file_name, cmoc_path, cmoc_flags, false);
+                if (res == 1) {
+                    vscode.window.showInformationMessage('Build Suceeded!');
+                    var res = tools.CopyToDSK(bin_path, disk_path, toolshed_path, toolshed_add_flags, toolshed_add_bin_options);
                     if (res == 1)
-                    {
-                        vscode.window.showInformationMessage('Build Suceeded!');
-                        var res = tools.CopyToDSK(bin_path, disk_path, toolshed_path, toolshed_add_flags, ' -2 -b');
-                        if (res == 1)
-                            vscode.window.showInformationMessage('File Added!');
-                        else
-                            vscode.window.showErrorMessage('File Add Failed!');
-                    }
+                        vscode.window.showInformationMessage('File Added!');
                     else
-                        vscode.window.showErrorMessage('Build Failed!');
-                    break;
+                        vscode.window.showErrorMessage('File Add Failed!');
+                }
+                else
+                    vscode.window.showErrorMessage('Build Failed!');
+                break;
             case '.BAS':
-                var res = tools.CopyToDSK(file_name, disk_path, toolshed_path, '-1 -a -t');
+                var res = tools.CopyToDSK(file_name, disk_path, toolshed_path, toolshed_add_flags, toolshed_add_basic_options);
                 if (res == 1)
                     vscode.window.showInformationMessage('File Added!');
                 else
@@ -158,49 +160,91 @@ function activate(context) {
     let cocoemulatorall = vscode.commands.registerCommand('cocotools.cocoemulatorall', function () {
         LoadOptions();
         var fs = require('fs');
-        var file_name = vscode.window.activeTextEditor.document.fileName
-        var input_dir = file_name.substring(0, file_name.lastIndexOf('\\'));
-        fs.readdirSync(input_dir).forEach(file => {
-            file = input_dir + '\\' + file;
-            switch (file.substring(file.lastIndexOf(".")).toUpperCase()) {
-                case '.ASM':
-                    var res = tools.BuildASM(file, lwtools_path);
-                    if (res == 1)
-                        vscode.window.showInformationMessage('Build Suceeded!');
-                    else
-                        vscode.window.showErrorMessage('Build Failed!');
-                    break;
-                case '.C':
-                    var res = tools.BuildC(file, cmoc_path);
-                    if (res == 1)
-                        vscode.window.showInformationMessage('Build Suceeded!');
-                    else
-                        vscode.window.showErrorMessage('Build Failed!');
-                    break;
-            }
-        });
+        var file_name = vscode.window.activeTextEditor.document.fileName;
+        var error = false;
 
-        fs.readdirSync(input_dir).forEach(file => {
-            file = input_dir + '\\' + file;
-            switch (file.substring(file.lastIndexOf(".")).toUpperCase()) {
-                case '.BAS':
-                    var res = tools.CopyToDSK(file, disk_path, toolshed_path, '-1 -a -t');
-                    if (res == 1)
-                        vscode.window.showInformationMessage('File Added!');
-                    else
-                        vscode.window.showErrorMessage('File Add Failed!');
-                    break;
-                case '.BIN':
-                    var res = tools.CopyToDSK(file, disk_path, toolshed_path, '-2 -b');
-                    if (res == 1)
-                        vscode.window.showInformationMessage('File Added!');
-                    else
-                        vscode.window.showErrorMessage('File Add Failed!');
-                    break;
-            }
-        });
+        if (recreateDskOnEachBuild) {
+            var res = tools.CreateDSK(disk_path, toolshed_path, toolshed_create_flags);
+            if (res == 0)
+                error = true;
+        }
 
-        tools.LaunchEmulator(emulator_path, disk_path, emulator_flags, file_name);
+        if (!error) {
+            var input_dir = path.dirname(file_name) + '\\';
+            fs.readdirSync(input_dir).forEach(file => {
+                //var orig_file_name = file;
+                file = input_dir + file;
+                switch (path.extname(file).toUpperCase()) {
+                    case '.ASM':
+                        var res = tools.BuildASM(file, lwtools_path, lwtools_flags);
+                        if (res == 0) {
+                            error = true;
+                            break;
+
+                        }
+                    // if (res == 1)
+                    //     vscode.window.showInformationMessage(orig_file_name + ': Build Suceeded!');
+                    // else
+                    // {
+                    //     vscode.window.showErrorMessage(orig_file_name + ': Build Failed!');
+                    //     error=true;
+                    //     break;
+                    // }
+                    // break;
+                    case '.C':
+                        var res = tools.BuildC(file, cmoc_path);
+                        // if (res == 1)
+                        //     vscode.window.showInformationMessage(orig_file_name + ': Build Suceeded!');
+                        // else
+                        // {
+                        //     vscode.window.showErrorMessage(orig_file_name + ': Build Failed!');
+                        //     error=true;
+                        //     break;
+                        // }
+
+                        if (res == 0) {
+                            error = true;
+                            break;
+                        }
+                    // break;
+                }
+            });
+        }
+
+        if (!error) {
+            fs.readdirSync(input_dir).forEach(file => {
+                var orig_file_name = file;
+                file = input_dir + file;
+                switch (path.extname(file).toUpperCase()) {
+                    case '.BAS':
+                        var res = tools.CopyToDSK(file, disk_path, toolshed_path, toolshed_add_flags, toolshed_add_basic_options);
+                        // if (res == 1)
+                        //     vscode.window.showInformationMessage(orig_file_name + ': File Added!');
+                        // else
+                        //     vscode.window.showErrorMessage(orig_file_name + ': File Add Failed!');
+                        if (res == 0) {
+                            vscode.window.showErrorMessage(orig_file_name + ': File Add Failed!');
+                            error = true;
+                        }
+                        break;
+                    case '.BIN':
+                        var res = tools.CopyToDSK(file, disk_path, toolshed_path, toolshed_add_flags, toolshed_add_bin_options);
+                        // if (res == 1)
+                        //     vscode.window.showInformationMessage(orig_file_name + ': File Added!');
+                        // else
+                        //     vscode.window.showErrorMessage(orig_file_name + ': File Add Failed!');
+                        if (res == 0) {
+                            vscode.window.showErrorMessage(orig_file_name + ': File Add Failed!');
+                            error = true;
+                        }
+                        break;
+                }
+            });
+        }
+
+        if (!error) {
+            tools.LaunchEmulator(emulator_path, disk_path, emulator_flags, file_name);
+        }
     });
 
     context.subscriptions.push(cocoemulatorall);

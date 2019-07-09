@@ -1,0 +1,98 @@
+{
+    "name": "cocotools",
+    "publisher": "jasonpittman",
+    "displayName": "COCOTools",
+    "description": "Tools to help you develop in BASIC/C/ASM for the Tandy color Computer in a modern IDE",
+    "version": "0.0.1",
+    "icon": "images/icon.png",
+    "engines": {
+        "vscode": "^1.29.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:cocotools.renumber",
+        "onCommand:cocotools.cocoemulator",
+        "onCommand:cocotools.cocoemulatorall",
+        "onCommand:cocotools.comment",
+        "onCommand:cocotools.uncomment"
+    ],
+    "main": "./extension",
+    "contributes": {
+        "commands": [
+            {
+                "command": "cocotools.renumber",
+                "title": "BASIC Renumber"
+            },
+            {
+                "command": "cocotools.comment",
+                "title": "BASIC Comment"
+            },
+            {
+                "command": "cocotools.uncomment",
+                "title": "BASIC Uncomment"
+            },
+            {
+                "command": "cocotools.cocoemulator",
+                "title": "COCO Emulator"
+            },
+            {
+                "command": "cocotools.cocoemulatorall",
+                "title": "COCO Emulator - All Files in Current Dir"
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "CoCo Tools",
+            "properties": {
+                "cocotools.emulatorpath": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Emulator Path"
+                },
+                "cocotools.toolshedpath": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Toolshed Path"
+                },
+                "cocotools.cmocpath": {
+                    "type": "string",
+                    "default": "",
+                    "description": "CMOC Path"
+                },
+                "cocotools.dskpath": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Disk Image Path"
+                },
+                "cocotools.lwtoolspath": {
+                    "type": "string",
+                    "default": "",
+                    "description": "LWTOOLS Path"
+                },
+                "cocotools.autonumber": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Automatically add new line numbers"
+                },
+                "cocotools.autorenumber": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Automatically Renumber"
+                }
+            }
+        }
+    },
+    "scripts": {
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.21",
+        "eslint": "^4.11.0",
+        "@types/node": "^8.10.25",
+        "@types/mocha": "^2.2.42"
+    }
+}

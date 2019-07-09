@@ -64,13 +64,23 @@
                 },
                 "cocotools.toolshedAddFileFlags": {
                     "type": "string",
-                    "default": "decb copy '[file_path]' -r '[DSK_path]' '[file_name]'",
-                    "description": "Flags to add a file to a .dsk in Toolshed"
+                    "default": "copy '[file_path]' -r '[DSK_path]' '[file_name]'",
+                    "description": "decb Flags to add a file to a .dsk in Toolshed"
+                },
+                "cocotools.toolshedAddBasicFileOptions": {
+                    "type": "string",
+                    "default": "-1 -a -t",
+                    "description": "decb copy Flags to add a file to a BASIC file to .dsk using Toolshed"
+                },
+                "cocotools.toolshedAddBinFileOptions": {
+                    "type": "string",
+                    "default": "-2 -b",
+                    "description": "decb copy Flags to add a file to a BIN file to .dsk using Toolshed"
                 },
                 "cocotools.toolshedCreateDiskFlags": {
                     "type": "string",
-                    "default": "decb dskini '[DSK_path]'",
-                    "description": "Flags to create a new .dsk in Toolshed"
+                    "default": "dskini \"[DSK_path]\"",
+                    "description": "decb Flags to create a new .dsk in Toolshed"
                 },
                 "cocotools.cmocExecutablePath": {
                     "type": "string",
