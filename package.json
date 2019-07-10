@@ -4,7 +4,7 @@
     "author": "Jason Pittman",
     "displayName": "COCOTools",
     "description": "Tools to help you develop in BASIC/C/ASM for the Tandy color Computer in a modern IDE",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "icon": "images/icon.png",
     "engines": {
         "vscode": "^1.29.0"
@@ -119,25 +119,26 @@
                 }
             }
         },
-        "keybindings": [{
-            "command": "cocotools.renumber",
-            "key": "ctrl+shift+r",
-            "mac": "cmd+shift+r",
-            "when": "editorTextFocus"
-        },
-        {
-            "command": "cocotools.cocoemulator",
-            "key": "ctrl+shift+e",
-            "mac": "cmd+shift+e",
-            "when": "editorTextFocus"
-        },
-        {
-            "command": "cocotools.cocoemulatorall",
-            "key": "ctrl+shift+a",
-            "mac": "cmd+shift+a",
-            "when": "editorTextFocus"
-        }
-    ]
+        "keybindings": [
+            {
+                "command": "cocotools.renumber",
+                "key": "ctrl+shift+r",
+                "mac": "cmd+shift+r",
+                "when": "editorTextFocus"
+            },
+            {
+                "command": "cocotools.cocoemulator",
+                "key": "ctrl+shift+e",
+                "mac": "cmd+shift+e",
+                "when": "editorTextFocus"
+            },
+            {
+                "command": "cocotools.cocoemulatorall",
+                "key": "ctrl+shift+a",
+                "mac": "cmd+shift+a",
+                "when": "editorTextFocus"
+            }
+        ]
     },
     "scripts": {
         "postinstall": "node ./node_modules/vscode/bin/install",
