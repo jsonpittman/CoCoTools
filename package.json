@@ -64,7 +64,7 @@
                 },
                 "cocotools.toolshedAddFileFlags": {
                     "type": "string",
-                    "default": "copy [file_opts] '[file_path]' -r '[DSK_path]' '[file_name]'",
+                    "default": "copy [file_opts] \"[file_path]\" -r \"[DSK_path]\",[file_name]",
                     "description": "decb Flags to add a file to a .dsk in Toolshed"
                 },
                 "cocotools.toolshedAddBasicFileOptions": {
@@ -84,7 +84,7 @@
                 },
                 "cocotools.cmocExecutablePath": {
                     "type": "string",
-                    "default": "",
+                    "default": "cmoc",
                     "description": "CMOC Path"
                 },
                 "cocotools.cmocFlags": {
@@ -124,7 +124,7 @@
                 },
                 "cocotools.recreateDskOnEachBuild": {
                     "type": "boolean",
-                    "default": false,
+                    "default": true,
                     "description": "Creates a new disk image each time an emulator is launched.\r\nIf not selected, files will be replaced on the existing disk image."
                 }
             }

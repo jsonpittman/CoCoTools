@@ -15,23 +15,13 @@ var lwtools_flags = workbenchConfig.get('lwtoolsFlags');
 var recreateDskOnEachBuild = workbenchConfig.get('recreateDskOnEachBuild');
 var toolshed_add_basic_options = workbenchConfig.get('toolshedAddBasicFileOptions');
 var toolshed_add_bin_options = workbenchConfig.get('toolshedAddBinFileOptions');
-
-// var emulator_flags = workbenchConfig.get('emulatorflags');
-// var emulator_flags = workbenchConfig.get('emulatorflags');
+var renumber_increment = workbenchConfig.get('renumberIncrement');
 
 const tools = require('./tools');
 const path = require('path');
 
 // mame coco3 -menu -skip_gameinfo -window -flop1 [DSK_path] -autoboot_delay 1 -autoboot_command "\nLOADM"[file_name]":EXEC\n"
 
-
-function LoadOptions() {
-    // toolshed_path = workbenchConfig.get('toolshedpath');
-    // lwtools_path = workbenchConfig.get('lwtoolspath');
-    // emulator_path = workbenchConfig.get('emulatorpath');
-    // disk_path = workbenchConfig.get('dskpath');
-    // emulator_flags = workbenchConfig.get('emulatorflags');
-};
 
 class Bas_Line {
     // object to represent a line of basic code,
@@ -62,6 +52,28 @@ class Bas_Line {
     }
 }
 
+function Renumber(lines, keyword) {
+    lines.forEach(line => {
+        let goto = line.line_str.indexOf(keyword);
+        if (goto > -1) {
+            var match = new RegExp(keyword + '\\ ?\\d+', 'g');
+            let gonum = line.line_str.match(match);
+            if (gonum != null && gonum.length > 0) {
+                for(var x = 0; x<gonum.length; x++) {
+                    var m = gonum[x].match(/\d+/);
+                    for(var y=0;y<m.length;y++) {
+                        let line_num = m[y];
+                        let new_num = GetNewLineNum(lines, line_num);
+                        let newgonum = gonum[x].replace(line_num, new_num);
+                        line.line_str = line.line_str.replace(gonum, newgonum);
+                    }
+                }
+            }
+        }
+    });
+    return lines;
+}
+
 function GetNewLineNum(lines, original_line_num) {
     var return_num = 0;
     lines.forEach(line => {
@@ -74,8 +86,6 @@ function GetNewLineNum(lines, original_line_num) {
 
 function activate(context) {
     let comment = vscode.commands.registerCommand('cocotools.comment', function () {
-        LoadOptions();
-
         let editor = vscode.window.activeTextEditor;
         if (!editor) {
             return; // No open text editor
@@ -109,7 +119,6 @@ function activate(context) {
         if (!editor) {
             return; // No open text editor
         }
-        LoadOptions();
         editor.document.save();
         var error = false;
 
@@ -141,7 +150,14 @@ function activate(context) {
                 if(res==0)
                 {
                     error=true;
-                    break;
+                }
+                else
+                {
+                    var res = tools.CopyToDSK(bin_path, disk_path, toolshed_path, toolshed_add_flags, toolshed_add_bin_options);
+                    if (res == 1)
+                        vscode.window.showInformationMessage('File Added!');
+                    else
+                        vscode.window.showErrorMessage('File Add Failed!');
                 }
                 // if (res == 1) {
                 //     vscode.window.showInformationMessage('Build Suceeded!');
@@ -154,6 +170,8 @@ function activate(context) {
                 // else
                 //     vscode.window.showErrorMessage('Build Failed!');
                 // break;
+                break;
+
             case '.BAS':
                 var res = tools.CopyToDSK(file_name, disk_path, toolshed_path, toolshed_add_flags, toolshed_add_basic_options);
                 bin_path = file_name.substring(0, file_name.lastIndexOf(".")) + ".BAS";
@@ -171,7 +189,6 @@ function activate(context) {
     context.subscriptions.push(cocoemulator);
 
     let cocoemulatorall = vscode.commands.registerCommand('cocotools.cocoemulatorall', function () {
-        LoadOptions();
         var fs = require('fs');
         var file_name = vscode.window.activeTextEditor.document.fileName;
         var error = false;
@@ -196,9 +213,9 @@ function activate(context) {
                         var res = tools.BuildASM(file, lwtools_path, lwtools_flags);
                         if (res == 0) {
                             error = true;
-                            break;
-
                         }
+                        break;
+
                     // if (res == 1)
                     //     vscode.window.showInformationMessage(orig_file_name + ': Build Suceeded!');
                     // else
@@ -221,9 +238,10 @@ function activate(context) {
 
                         if (res == 0) {
                             error = true;
-                            break;
                         }
                     // break;
+                    break;
+
                 }
             });
         }
@@ -267,7 +285,6 @@ function activate(context) {
     context.subscriptions.push(cocoemulatorall);
 
     let renumber = vscode.commands.registerCommand('cocotools.renumber', function () {
-        LoadOptions();
         let editor = vscode.window.activeTextEditor;
         if (!editor) {
             return; // No open text editor
@@ -290,37 +307,16 @@ function activate(context) {
             }
         }
 
-        var line_start = 10;
+        var line_start = renumber_increment;
         linelist.forEach(line => {
             line.new_line_num = line_start;
-            line_start += 10;
+            line_start += renumber_increment;
         });
 
-        linelist.forEach(line => {
-            let goto = line.line_str.indexOf("GOTO");
-            if (goto > -1) {
-                let gonum = line.line_str.match(/GOTO \d+/)[0];
-                if (gonum.length > 0) {
-                    let line_num = gonum.match(/\d+/)[0];
-                    let new_num = GetNewLineNum(linelist, line_num);
-                    let newgonum = gonum.replace(line_num, new_num);
-                    line.line_str = line.line_str.replace(gonum, newgonum);
-                }
-            }
-        });
-
-        linelist.forEach(line => {
-            let goto = line.line_str.indexOf("GOSUB");
-            if (goto > -1) {
-                let gonum = line.line_str.match(/GOSUB \d+/)[0];
-                if (gonum.length > 0) {
-                    let line_num = gonum.match(/\d+/)[0];
-                    let new_num = GetNewLineNum(linelist, line_num);
-                    let newgonum = gonum.replace(line_num, new_num);
-                    line.line_str = line.line_str.replace(gonum, newgonum);
-                }
-            }
-        });
+        Renumber(linelist, "GOTO");
+        Renumber(linelist, "GOSUB");
+        Renumber(linelist, "THEN");
+        Renumber(linelist, "ELSE");
 
         for (ls = 0; ls < linelist.length; ls++) {
             let line = editor.document.lineAt(ls);
@@ -338,8 +334,6 @@ function activate(context) {
     context.subscriptions.push(renumber);
 }
 exports.activate = activate;
-
-
 
 function deactivate() {
 }

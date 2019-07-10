@@ -1,65 +1,38 @@
-# renum README
+# CoCo Tools README
 
-CoCoTools is a VS Code extension that does some cool stuff.
+CoCoTools is a VS Code extension that helps automate a Tandy Color Computer development workflow. Supports code written in BASIC, C and ASM.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+The extension adds several features to the VS Code Command Palette (accessed by hitting Ctrl+Shift+P). These Include:
 
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+* `BASIC Renumber`: Renumbers the currently opened BASIC file in the same fashion that old RENUM statement works.
+* `BASIC Comment`: Adds REM statement(s) to the currently selected line(s).  `Currently Unavailable`
+* `BASIC Uncomment`: Removes REM statement(s) from the currently selected line(s).
+* `COCO Emulator`: Launches an emulator with the currently opened file added to the disk image. If it is a .BAS file, it is copied to the image. .C files are compiled using CMOC, or .ASM files are assembled in LWTOOLS and the resulting .BIN is copied to the disk image.
+* `COCO Emulator - All Files in Current Dir`: The same as "COCO Emulator", except all files in the same directory as the currently opened file are copied (.BAS) or built (.C, .ASM) and the resulting binaries are copied.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+* `CoCo Emulator`: The extension has been (lightly) tested with VCC on Windows and MAME on Windows and Linux.
+* `CMOC`: Required to compile .C files
+* `LWTOOLS`: Required to assemble .ASM files
+* `Toolshed`: Required for Emulator support. Used to initialize and copy files to disk image.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+The extension has many settings under File -> Preferences -> Settings -> Extensions -> CoCo Tools.
 
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+Detailed description of settings coming soon.
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+`Basic Uncomment` not working
 
-## Release Notes
+### 0.0.1
 
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+Initial release of CoCo Tools for demo and testing.
 
 -----------------------------------------------------------------------------------------------------------
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
 
 **Enjoy!**
