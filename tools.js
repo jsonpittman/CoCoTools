@@ -26,8 +26,6 @@ module.exports = {
     return 1;
   },
   BuildC: function (input_path, cmoc_path, cmoc_flags, remap_cygwin) {
-    const vscode = require('vscode');
-
     try {
       var friendly_path = "";
 
@@ -59,14 +57,14 @@ module.exports = {
     return 1;
   },
   CreateDSK(DSK_path, toolshed_path, toolshed_flags) {
-    toolshed_flags = toolshed_flags.replace('[DSK_path]',DSK_path);
+    toolshed_flags = toolshed_flags.replace('[DSK_path]', DSK_path);
     var fs = require('fs');
     var path = require('path');
 
     try {
       fs.unlink(DSK_path, (err) => {
         if (err) throw err;
-         console.log(DSK_path + ' was deleted');
+        console.log(DSK_path + ' was deleted');
       });
 
       var toolshed_command = '"' + path.join(toolshed_path, "decb") + '" ' + toolshed_flags;
@@ -105,7 +103,7 @@ module.exports = {
       debc.execSync(debc_command);
     }
     catch (exc) {
-    var vscode = require('vscode');
+      var vscode = require('vscode');
       vscode.window.showErrorMessage("Error copying to DSK: " + exc.stdout.toString());
       return 0;
     }

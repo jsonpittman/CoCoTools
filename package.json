@@ -14,8 +14,6 @@
     ],
     "activationEvents": [
         "onCommand:cocotools.renumber",
-        "onCommand:cocotools.comment",
-        "onCommand:cocotools.uncommnet",
         "onCommand:cocotools.cocoemulator",
         "onCommand:cocotools.cocoemulatorall"
     ],
@@ -25,14 +23,6 @@
             {
                 "command": "cocotools.renumber",
                 "title": "BASIC Renumber"
-            },
-            {
-                "command": "cocotools.comment",
-                "title": "BASIC Comment"
-            },
-            {
-                "command": "cocotools.uncomment",
-                "title": "BASIC Uncomment"
             },
             {
                 "command": "cocotools.cocoemulator",
@@ -128,7 +118,26 @@
                     "description": "Creates a new disk image each time an emulator is launched.\r\nIf not selected, files will be replaced on the existing disk image."
                 }
             }
+        },
+        "keybindings": [{
+            "command": "cocotools.renumber",
+            "key": "ctrl+shift+r",
+            "mac": "cmd+shift+r",
+            "when": "editorTextFocus"
+        },
+        {
+            "command": "cocotools.cocoemulator",
+            "key": "ctrl+shift+e",
+            "mac": "cmd+shift+e",
+            "when": "editorTextFocus"
+        },
+        {
+            "command": "cocotools.cocoemulatorall",
+            "key": "ctrl+shift+a",
+            "mac": "cmd+shift+a",
+            "when": "editorTextFocus"
         }
+    ]
     },
     "scripts": {
         "postinstall": "node ./node_modules/vscode/bin/install",
