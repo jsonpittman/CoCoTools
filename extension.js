@@ -16,6 +16,7 @@ var recreateDskOnEachBuild = workbenchConfig.get('recreateDskOnEachBuild');
 var toolshed_add_basic_options = workbenchConfig.get('toolshedAddBasicFileOptions');
 var toolshed_add_bin_options = workbenchConfig.get('toolshedAddBinFileOptions');
 var renumber_increment = workbenchConfig.get('renumberIncrement');
+var remap_cygwin = workbenchConfig.get('cmocCygwin');
 
 const tools = require('./tools');
 const path = require('path');
@@ -118,7 +119,7 @@ function activate(context) {
                         break;
                     case '.C':
                         bin_path = file_name.substring(0, file_name.lastIndexOf(".")) + ".BIN";
-                        var res = tools.BuildC(file_name, cmoc_path, cmoc_flags, false);
+                        var res = tools.BuildC(file_name, cmoc_path, cmoc_flags, remap_cygwin);
                         if (res == 0) {
                             error = true;
                         }
@@ -156,8 +157,6 @@ function activate(context) {
                     tools.LaunchEmulator(emulator_path, disk_path, emulator_flags, path.basename(bin_path));
 
             })
-
-
     });
 
     context.subscriptions.push(cocoemulator);
@@ -205,7 +204,7 @@ function activate(context) {
                             // }
                             // break;
                             case '.C':
-                                var res = tools.BuildC(file, cmoc_path, cmoc_flags, cmoc_cygwin);
+                                var res = tools.BuildC(file, cmoc_path, cmoc_flags, cmoc_cygwin, remap_cygwin);
                                 // if (res == 1)
                                 //     vscode.window.showInformationMessage(orig_file_name + ': Build Suceeded!');
                                 // else

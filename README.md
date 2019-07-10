@@ -35,7 +35,7 @@ Initial release of CoCo Tools for demo and testing.
 
 * Removed code commenting / uncommenting. This already works by default in VS Code.
 * Added default keybindings.
-* Saves changes to open document before emulator is launched.
+* Saves changes to active document before emulator is launched.
 
 
 -----------------------------------------------------------------------------------------------------------
