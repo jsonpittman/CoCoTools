@@ -29,7 +29,7 @@ Detailed description of settings coming soon.
 
 ### 0.0.1
 
-Initial release of CoCo Tools for demo and testing.
+* Initial release of CoCo Tools for demo and testing.
 
 ### 0.0.2
 
@@ -37,6 +37,9 @@ Initial release of CoCo Tools for demo and testing.
 * Added default keybindings.
 * Saves changes to active document before emulator is launched.
 
+### 0.0.3
+
+* Resolved CMOC on Windows issue
 
 -----------------------------------------------------------------------------------------------------------
 
