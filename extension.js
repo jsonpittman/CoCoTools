@@ -43,7 +43,17 @@ class Bas_Line {
     }
     get new_str() {
         //return the line with new line number
+
+        //if the line doesn't start with a line number, insert the new number
+        try {
+            var line_num = parseInt(this.line_str.match(/^\d+/)[0]);
+        }
+        catch (ex) {
+            return this.new_line_num + ' ' + this.line_str;
+        }
+
         return this.line_str.replace(this.line_num, this.new_line_num);
+
     }
     get line_num() {
         return this._line_num;
@@ -107,7 +117,7 @@ function activate(context) {
                         bin_path = file_name.substring(0, file_name.lastIndexOf(".")) + ".BIN";
                         var res = tools.BuildASM(file_name, lwtools_path, lwtools_flags);
                         if (res == 0) {
-                            error=true;
+                            error = true;
                         }
                         else {
                             var res = tools.CopyToDSK(bin_path, disk_path, toolshed_path, toolshed_add_flags, toolshed_add_bin_options);
@@ -276,15 +286,19 @@ function activate(context) {
             var ls;
 
             //build array of old and new line numbers
-            for (ls = 0; ls < editor.document.lineCount; ls++) {
+            for (ls = 0; ls < editor.document.lineCount - 1; ls++) {
                 let line = editor.document.lineAt(ls);
-                if (line.text.trimRight().length > 0) {
-                    let line_num = parseInt(line.text.match(/\d+/)[0]);
-                    let line_str = line.text.substring(line_num.length);
-
-                    var l = new Bas_Line(line_num, line_str);
-                    linelist.push(l);
+                var line_num = 1;
+                try {
+                    line_num = parseInt(line.text.match(/^\d+/)[0]);
                 }
+                catch (ex) {
+
+                }
+
+                let line_str = line.text.substring(line_num.length);
+                var l = new Bas_Line(line_num, line_str);
+                linelist.push(l);
             }
 
             var line_start = renumber_increment;
@@ -300,10 +314,10 @@ function activate(context) {
 
             for (ls = 0; ls < linelist.length; ls++) {
                 let line = editor.document.lineAt(ls);
-                if (line.text.trimRight().length > 0) {
-                    //console.log("LINE: " + linelist[ls].new_str);
-                    edit.replace(editor.document.uri, line.range, linelist[ls].new_str);
-                }
+                //if (line.text.trimRight().length > 0) {
+                //console.log("LINE: " + linelist[ls].new_str);
+                edit.replace(editor.document.uri, line.range, linelist[ls].new_str);
+                //}
             }
 
             vscode.workspace.applyEdit(edit);
