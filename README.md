@@ -41,6 +41,10 @@ Detailed description of settings coming soon.
 
 * Resolved CMOC on Windows issue
 
+### 0.0.4
+
+* Renumber issue - can now renumber without an initial line number
+
 -----------------------------------------------------------------------------------------------------------
 
 **Enjoy!**
