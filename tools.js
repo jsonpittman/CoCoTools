@@ -114,8 +114,13 @@ module.exports = {
   LaunchEmulator: function (emulator_path, disk_path, emulator_flags, file_name, run_command) {
     emulator_flags = emulator_flags.replace("[DSK_path]", disk_path);
 
+    wat = "C:\\test\\".split();
+
     if (run_command.length > 0) {
-        emulator_flags += run_command.replace("[file_name]", file_name);
+        run_command = run_command.replace("[file_name]", file_name);
+        //run_command = run_command .replace('"', '\"');
+        //run_command = run_command.replace("/\/\//g", "/");
+        emulator_flags += " -autoboot_delay 1 -autoboot_command \"\"" + run_command + "\n\"\"";
     }
 
     // if(file_name.length > 0 && emulator_flags.length > 0)
