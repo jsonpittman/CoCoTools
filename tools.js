@@ -118,9 +118,7 @@ module.exports = {
 
     if (run_command.length > 0) {
         run_command = run_command.replace("[file_name]", file_name);
-        //run_command = run_command .replace('"', '\"');
-        //run_command = run_command.replace("/\/\//g", "/");
-        emulator_flags += " -autoboot_delay 1 -autoboot_command \"\"" + run_command + "\n\"\"";
+        emulator_flags += " -autoboot_delay 1 -autoboot_command '" + run_command + "\\n'";
     }
 
     // if(file_name.length > 0 && emulator_flags.length > 0)
