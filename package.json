@@ -4,7 +4,7 @@
     "author": "Jason Pittman",
     "displayName": "COCOTools",
     "description": "Tools to help you develop in BASIC/C/ASM for the Tandy color Computer in a modern IDE",
-    "version": "0.0.3",
+    "version": "0.0.5",
     "icon": "images/icon.png",
     "engines": {
         "vscode": "^1.29.0"
@@ -46,6 +46,11 @@
                     "type": "string",
                     "default": "",
                     "description": "Command line arguments to pass to the emulator on launch"
+                },
+                "cocotools.emulatorRunCommand": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Addition to command line arguments for sending a RUN, LOAD, etc command to MAME"
                 },
                 "cocotools.toolshedPath": {
                     "type": "string",

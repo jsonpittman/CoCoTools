@@ -45,6 +45,9 @@ Detailed description of settings coming soon.
 
 * Renumber issue - can now renumber without an initial line number
 
+### 0.0.5
+* Added flag for Mame RUN commands
+* Ability to renumber only highlighted code
 -----------------------------------------------------------------------------------------------------------
 
 **Enjoy!**

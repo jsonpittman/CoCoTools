@@ -30,7 +30,8 @@ module.exports = {
       var friendly_path = "";
 
       if (remap_cygwin == true) {
-        friendly_path = "/cygdrive/";
+        friendly_path = "/cygdrive/";   //  Cygwin
+        //friendly_path = "/mnt/";          //  WSL
         friendly_path += input_path.replace(/\\/g, "/");
         friendly_path = friendly_path.replace(":", "");
         friendly_path = friendly_path.substring(0, friendly_path.lastIndexOf("."));
@@ -51,7 +52,8 @@ module.exports = {
       buildProcess.execSync(cmoc_command);
     } catch (exc) {
       const vscode = require('vscode');
-      vscode.window.showErrorMessage(exc.stdout.toString());
+      var err = exc.stdout.toString();
+      vscode.window.showErrorMessage(err);
       return 0;
     }
     return 1;
@@ -109,15 +111,20 @@ module.exports = {
     }
     return 1;
   },
-  LaunchEmulator: function (emulator_path, disk_path, emulator_flags, file_name) {
+  LaunchEmulator: function (emulator_path, disk_path, emulator_flags, file_name, run_command) {
     emulator_flags = emulator_flags.replace("[DSK_path]", disk_path);
+
+    if (run_command.length > 0) {
+        emulator_flags += run_command.replace("[file_name]", file_name);
+    }
+
     // if(file_name.length > 0 && emulator_flags.length > 0)
     //   if(file_name.toUpperCase().endsWith('.BIN'))
     //     emulator_flags += ' -autoboot_command "\nLOADM\"' + file_name + '\":EXEC\n"';
     //   else if(file_name.toUpperCase().endsWith('.BAS'))
-    //     emulator_flags += ' -autoboot_delay 1 -autoboot_command "LOAD\"' + file_name + '\":RUN';
-    var run_path = emulator_path + ' ' + emulator_flags;
+    //     emulator_flags += ' -autoboot_delay 1 -autoboot_command "RUN\\\"' + file_name + '\\\""';
 
+    var run_path = emulator_path + ' ' + emulator_flags;
 
     var childProcess = require('child_process');
     try {

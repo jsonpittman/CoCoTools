@@ -17,6 +17,7 @@ var toolshed_add_basic_options = workbenchConfig.get('toolshedAddBasicFileOption
 var toolshed_add_bin_options = workbenchConfig.get('toolshedAddBinFileOptions');
 var renumber_increment = workbenchConfig.get('renumberIncrement');
 var remap_cygwin = workbenchConfig.get('cmocCygwin');
+var run_command = workbenchConfig.get('emulatorRunCommand')
 
 const tools = require('./tools');
 const path = require('path');
@@ -76,7 +77,10 @@ function Renumber(lines, keyword) {
                         let line_num = m[y];
                         let new_num = GetNewLineNum(lines, line_num);
                         let newgonum = gonum[x].replace(line_num, new_num);
-                        line.line_str = line.line_str.replace(gonum, newgonum);
+                        if (new_num != 0)
+                            line.line_str = line.line_str.replace(gonum, newgonum);
+                        else
+                        vscode.window.showInformationMessage('Line not found: ' + line_num);
                     }
                 }
             }
@@ -164,7 +168,7 @@ function activate(context) {
                 }
 
                 if (!error)
-                    tools.LaunchEmulator(emulator_path, disk_path, emulator_flags, path.basename(bin_path));
+                    tools.LaunchEmulator(emulator_path, disk_path, emulator_flags, path.basename(bin_path), run_command);
 
             })
     });
@@ -285,8 +289,20 @@ function activate(context) {
             let edit = new vscode.WorkspaceEdit();
             var ls;
 
+            var st = vscode.window.activeTextEditor.selection.start.line;
+            var en = vscode.window.activeTextEditor.selection.end.line;
+
+            if(en == NaN || en <= st)
+            {
+                st = 0;
+                en = editor.document.lineCount - 1;
+            }
+            else
+                if(en < editor.document.lineCount)
+                    en++;
+
             //build array of old and new line numbers
-            for (ls = 0; ls < editor.document.lineCount - 1; ls++) {
+            for (ls = st; ls < en; ls++) {
                 let line = editor.document.lineAt(ls);
                 var line_num = 1;
                 try {
@@ -312,11 +328,11 @@ function activate(context) {
             Renumber(linelist, "THEN");
             Renumber(linelist, "ELSE");
 
-            for (ls = 0; ls < linelist.length; ls++) {
+            for (ls = st; ls < en; ls++) {
                 let line = editor.document.lineAt(ls);
                 //if (line.text.trimRight().length > 0) {
                 //console.log("LINE: " + linelist[ls].new_str);
-                edit.replace(editor.document.uri, line.range, linelist[ls].new_str);
+                edit.replace(editor.document.uri, line.range, linelist[ls - st].new_str);
                 //}
             }
 
