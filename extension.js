@@ -270,7 +270,7 @@ function activate(context) {
                 }
 
                 if (!error) {
-                    tools.LaunchEmulator(emulator_path, disk_path, emulator_flags);
+                    tools.LaunchEmulator(emulator_path, disk_path, emulator_flags, "", "");
                 }
             })
     });
