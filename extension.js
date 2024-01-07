@@ -708,7 +708,7 @@ function activate(context) {
             tools.LaunchXroar(
                 path.parse(xroar_path).base,
                 xroar_root_dir,
-                tempdir
+                path.join(tempdir, xroar_snapshot_temp)
             );
             // }
         }
