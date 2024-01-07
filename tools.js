@@ -3,7 +3,7 @@ module.exports = {
     var run_path = emulator_path + " -load " + snapshot_path;
     var childProcess = require('child_process');
     try {
-      if (!process.platform === 'win32')
+      if (process.platform != 'win32')
         run_path = "./" + run_path;
 
       childProcess.exec(run_path, { cwd: launch_dir });

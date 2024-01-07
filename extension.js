@@ -8,7 +8,7 @@ var renumber_increment = workbenchConfig.get('renumberIncrement');
 var xroar_path = workbenchConfig.get('xroarPath');
 var xroar_root_dir; // = path.dirname(xroar_path);
 var xroar_snapshot_template = workbenchConfig.get('xroarSnapshotTemplate');
-var tempdir = workbenchConfig.get('tempdir');
+var tempdir = workbenchConfig.get('tempDirectory');
 var xroar_snapshot_temp = workbenchConfig.get('xroarSnapshotTemp');
 
 const xroar_start = 458907; //position in snapshot file where memory starts

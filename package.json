@@ -46,7 +46,7 @@
                     "default": "C:\\Path\\To\\xroar.exe",
                     "markdownDescription": "Path to the XRoar executable\n\nExamples:\n\n* Windows: C:\\xroar\\xroar.exe\n* Linux: /usr/bin/xroar\n* Mac: /Applications/xroar.app/Contents/MacOS/xroar\n\nSee [https://www.6809.org.uk/xroar](https://www.6809.org.uk/xroar/) for more information on XRoar"
                 },
-                "cocotools.tempdir": {
+                "cocotools.tempDirectory": {
                     "type": "string",
                     "default": "c:\\temp",
                     "description": "A writable temp directory where the snapshots will be written"
