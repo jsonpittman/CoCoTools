@@ -12,119 +12,59 @@
     "categories": [
         "Other"
     ],
-    "activationEvents": [
-        "onCommand:cocotools.renumber",
-        "onCommand:cocotools.cocoemulator",
-        "onCommand:cocotools.cocoemulatorall"
-    ],
     "main": "./extension",
     "contributes": {
         "commands": [
             {
                 "command": "cocotools.renumber",
-                "title": "BASIC Renumber"
+                "title": "CoCo Tools: Renumber"
             },
             {
-                "command": "cocotools.cocoemulator",
-                "title": "COCO Emulator"
+                "command": "cocotools.format",
+                "title": "CoCo Tools: Formatting"
             },
             {
-                "command": "cocotools.cocoemulatorall",
-                "title": "COCO Emulator - All Files in Current Dir"
+                "command": "cocotools.removespaces",
+                "title": "CoCo Tools: Remove Spaces"
+            },
+            {
+                "command": "cocotools.xroar",
+                "title": "CoCo Tools: Launch XRoar"
             }
         ],
         "configuration": {
             "type": "object",
             "title": "CoCo Tools",
             "properties": {
-                "cocotools.emulatorPath": {
-                    "type": "string",
-                    "default": "",
-                    "description": "Path to launch your chosen emulator. (VCC or MAME)"
-                },
-                "cocotools.emulatorFlags": {
-                    "type": "string",
-                    "default": "",
-                    "description": "Command line arguments to pass to the emulator on launch"
-                },
-                "cocotools.emulatorRunCommand": {
-                    "type": "string",
-                    "default": "",
-                    "description": "Addition to command line arguments for sending a RUN, LOAD, etc command to MAME"
-                },
-                "cocotools.toolshedPath": {
-                    "type": "string",
-                    "default": "",
-                    "description": "Path to Toolshed directory"
-                },
-                "cocotools.toolshedAddFileFlags": {
-                    "type": "string",
-                    "default": "copy [file_opts] \"[file_path]\" -r \"[DSK_path]\",[file_name]",
-                    "description": "decb Flags to add a file to a .dsk in Toolshed"
-                },
-                "cocotools.toolshedAddBasicFileOptions": {
-                    "type": "string",
-                    "default": "-1 -a -t",
-                    "description": "decb copy Flags to add a file to a BASIC file to .dsk using Toolshed"
-                },
-                "cocotools.toolshedAddBinFileOptions": {
-                    "type": "string",
-                    "default": "-2 -b",
-                    "description": "decb copy Flags to add a file to a BIN file to .dsk using Toolshed"
-                },
-                "cocotools.toolshedCreateDiskFlags": {
-                    "type": "string",
-                    "default": "dskini \"[DSK_path]\"",
-                    "description": "decb Flags to create a new .dsk in Toolshed"
-                },
-                "cocotools.cmocExecutablePath": {
-                    "type": "string",
-                    "default": "cmoc",
-                    "description": "CMOC Path"
-                },
-                "cocotools.cmocFlags": {
-                    "type": "string",
-                    "default": "-o [output_path] [input_path]",
-                    "description": "Flags sent to CMOC when c file is compiled"
-                },
-                "cocotools.cmocCygwin": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "If CMOC is installed in CYGWIN (Windows), paths will need to be remapped\r\nso CMOC can access files from CYGWIN.\r\n\r\nFor example, \"C:\\Test\\stuff.c\" will need to me remapped to \"\\\\cygwin\\c\\Test\\Stuff.c\""
-                },
-                "cocotools.diskPath": {
-                    "type": "string",
-                    "default": "",
-                    "description": "Disk Image Path"
-                },
-                "cocotools.lwtoolsExecutablePath": {
-                    "type": "string",
-                    "default": "",
-                    "description": "Path to the LWTOOLS executable"
-                },
-                "cocotools.lwtoolsFlags": {
-                    "type": "string",
-                    "default": "[input_path] --6809 --list --symbols --6800compat --output=[output_path] --format=decb",
-                    "description": "Command-Line arguments for LWTOOLS"
-                },
-                "cocotools.autoNumber": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Automatically add new line numbers"
-                },
                 "cocotools.renumberIncrement": {
                     "type": "integer",
                     "default": 10,
                     "description": "Line number increment to use when renumbering BASIC"
                 },
-                "cocotools.recreateDskOnEachBuild": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Creates a new disk image each time an emulator is launched.\r\nIf not selected, files will be replaced on the existing disk image."
+                "cocotools.xroarPath": {
+                    "type": "string",
+                    "default": "C:\\Path\\To\\xroar.exe",
+                    "markdownDescription": "Path to the XRoar executable\n\nExamples:\n\n* Windows: C:\\xroar\\xroar.exe\n* Linux: /usr/bin/xroar\n* Mac: /Applications/xroar.app/Contents/MacOS/xroar\n\nSee [https://www.6809.org.uk/xroar](https://www.6809.org.uk/xroar/) for more information on XRoar"
+                },
+                "cocotools.xroarSnapshotTemplate": {
+                    "type": "string",
+                    "default": "coco3_decb.snp",
+                    "description": "Filename of the initial snapshot template to use when launching xroar (created in xroar directory)"
+                },
+                "cocotools.xroarSnapshotTemp": {
+                    "type": "string",
+                    "default": "temp.snp",
+                    "description": "Filename of the temporary snapshot to use when launching xroar (created in xroar directory)"
                 }
             }
         },
         "keybindings": [
+            {
+                "command": "cocotools.format",
+                "key": "ctrl+shift+f",
+                "mac": "cmd+shift+f",
+                "when": "editorTextFocus"
+            },
             {
                 "command": "cocotools.renumber",
                 "key": "ctrl+shift+r",
@@ -132,15 +72,15 @@
                 "when": "editorTextFocus"
             },
             {
-                "command": "cocotools.cocoemulator",
-                "key": "ctrl+shift+e",
-                "mac": "cmd+shift+e",
+                "command": "cocotools.removespaces",
+                "key": "ctrl+shift+s",
+                "mac": "cmd+shift+s",
                 "when": "editorTextFocus"
             },
             {
-                "command": "cocotools.cocoemulatorall",
-                "key": "ctrl+shift+a",
-                "mac": "cmd+shift+a",
+                "command": "cocotools.xroar",
+                "key": "ctrl+shift+e",
+                "mac": "cmd+shift+e",
                 "when": "editorTextFocus"
             }
         ]
