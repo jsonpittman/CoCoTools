@@ -8,6 +8,7 @@ var renumber_increment = workbenchConfig.get('renumberIncrement');
 var xroar_path = workbenchConfig.get('xroarPath');
 var xroar_root_dir; // = path.dirname(xroar_path);
 var xroar_snapshot_template = workbenchConfig.get('xroarSnapshotTemplate');
+var tempdir = workbenchConfig.get('tempdir');
 var xroar_snapshot_temp = workbenchConfig.get('xroarSnapshotTemp');
 
 const xroar_start = 458907; //position in snapshot file where memory starts
@@ -625,9 +626,10 @@ function activate(context) {
 
             // check for snapshot template.
             // write the template to the xroar directory if it does not exist
-            if (!fs.existsSync(path.join(xroar_root_dir, xroar_snapshot_template))) {
+            var temppath = path.join(tempdir, xroar_snapshot_template);
+            if (!fs.existsSync(temppath)) {
                 let snap = new snaps.coco3_decb;
-                fs.writeFileSync(path.join(xroar_root_dir, xroar_snapshot_template), snap);
+                fs.writeFileSync(temppath, snap);
             }
 
             incr = 1;
@@ -662,7 +664,7 @@ function activate(context) {
             bytes.push(0);
             bytes.push(0);
 
-            let before_read = fs.readFileSync(path.join(xroar_root_dir, xroar_snapshot_template));
+            let before_read = fs.readFileSync(path.join(tempdir, xroar_snapshot_template));
 
             // write loaded snapshot for later use
             // require('fs').writeFile(
@@ -700,13 +702,13 @@ function activate(context) {
                 mem_step++;
             }
 
-            fs.writeFileSync(path.join(xroar_root_dir, xroar_snapshot_temp), before_read);
+            fs.writeFileSync(path.join(tempdir, xroar_snapshot_temp), before_read);
 
             // if (!error) {
             tools.LaunchXroar(
                 path.parse(xroar_path).base,
                 xroar_root_dir,
-                xroar_snapshot_temp
+                tempdir
             );
             // }
         }
