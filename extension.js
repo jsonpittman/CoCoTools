@@ -409,8 +409,8 @@ function activate(context) {
 
                 var original_line = editor.document.lineAt(ln).text.trim();
                 var firstSpace = original_line.indexOf(' ');
-                if(firstSpace > -1) {
-                    var lineNum = original_line.slice(0,firstSpace);
+                if (firstSpace > -1) {
+                    var lineNum = original_line.slice(0, firstSpace);
                     var remainingLine = original_line.slice(firstSpace);
                     remainingLine = remainingLine.trim();
                     original_line = lineNum + ' ' + remainingLine;
@@ -704,13 +704,17 @@ function activate(context) {
 
             fs.writeFileSync(path.join(tempdir, xroar_snapshot_temp), before_read);
 
-            // if (!error) {
-            tools.LaunchXroar(
-                path.parse(xroar_path).base,
-                xroar_root_dir,
-                path.join(tempdir, xroar_snapshot_temp)
-            );
-            // }
+            if(fs.existsSync(xroar_path)) {
+                tools.LaunchXroar(
+                    path.parse(xroar_path).base,
+                    xroar_root_dir,
+                    path.join(tempdir, xroar_snapshot_temp)
+                );
+            }
+            else
+            {
+                     vscode.window.showErrorMessage("XRoar not found: " + exc.stdout.toString());
+            }
         }
     });
 
