@@ -23,7 +23,7 @@ I have tried to simplify the settings from previous versions so that it only inc
 * `XRoar Path`: The path to your XRoar executable. Examples show what your path might look like for Windows, Linux, and Mac.
 * `Snapshot Filenames`: These are the snapshots that the extension will use when launching XRoar. They will be created automatically in the XRoar executable directory. You don't need to change these filenames, but you can if you want.
 
-![](2024-01-07-09-44-20.png)
+![](2024-01-07-17-05-12.png)
 
 ## Known Issues
 
