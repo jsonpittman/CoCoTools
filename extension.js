@@ -500,7 +500,8 @@ function activate(context) {
             for (ln = 0; ln < line_count; ln++) {
                 //this line of text
                 var original_line = editor.document.lineAt(ln).text;
-                lines.push(original_line);
+                if(original_line.trim().length > 0)
+                    lines.push(original_line);
 
                 // //object to represent the line with new line number, etc
                 // if (original_line.trim().length > 0) {
@@ -657,7 +658,8 @@ function activate(context) {
             //build array of old and new line numbers
             for (ls = st; ls <= en; ls++) {
                 let line = editor.document.lineAt(ls);
-                bytes = bytes.concat(getCoCoLine(line.text));
+                if(line.text.trim().length > 0)
+                    bytes = bytes.concat(getCoCoLine(line.text));
             }
 
             bytes.push(0);
