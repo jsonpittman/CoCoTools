@@ -70,6 +70,9 @@ class LineInfo {
             newLine = templine;
         });
 
+        if (newLine.trim().length == 0)
+            return "";
+
         if (isNaN(newLine[0])) {
             newLine = "1 " + newLine;
         }
@@ -92,8 +95,10 @@ function processBasic() {
 
     let newLineNum = renumber_increment;
     for (let l of list) {
-        l.NewLineNumber = newLineNum;
-        newLineNum += renumber_increment;
+        if (l.getOriginalLine().trim().length > 0) {
+            l.NewLineNumber = newLineNum;
+            newLineNum += renumber_increment;
+        }
     }
 
     let keywords = ["GOTO", "GOSUB", "THEN", "ELSE"];
@@ -358,13 +363,37 @@ function activate(context) {
 
                 let parts = lineremainder.split('"');
 
+
                 for (let i = 0; i < parts.length; i++) {
                     if (i % 2 === 0 && parts[i].length > 0) {
                         let text = parts[i];
-                        text = text.replace(/\s+/g, '');
-                        parts[i] = text;
+
+                        var comment_location = -1;
+                        comment_location = text.indexOf("'");
+                        if (comment_location === -1)
+                            comment_location = text.indexOf("REM");
+
+                        if (comment_location > -1) {
+                            let text_before_comment = text.slice(0, comment_location);
+                            let text_after_comment = text.slice(comment_location);
+                            text_before_comment = text_before_comment.replace(/\s+/g, '');
+                            parts[i] = text_before_comment + text_after_comment;
+                        }
+                        else {
+                            text = text.replace(/\s+/g, '');
+                            parts[i] = text;
+                        }
+
+                        // if (comment_location > -1) {
+                        //     text = text.slice(0, comment_location);
+                        // }
+
+                        // text = text.replace(/\s+/g, '');
+                        // parts[i] = text;
                     }
                 }
+
+
                 newLine = parts.join('"');
                 lines.push(linenum + " " + newLine);
 
@@ -500,8 +529,8 @@ function activate(context) {
             for (ln = 0; ln < line_count; ln++) {
                 //this line of text
                 var original_line = editor.document.lineAt(ln).text;
-                if(original_line.trim().length > 0)
-                    lines.push(original_line);
+                // if(original_line.trim().length > 0)
+                lines.push(original_line);
 
                 // //object to represent the line with new line number, etc
                 // if (original_line.trim().length > 0) {
@@ -658,7 +687,7 @@ function activate(context) {
             //build array of old and new line numbers
             for (ls = st; ls <= en; ls++) {
                 let line = editor.document.lineAt(ls);
-                if(line.text.trim().length > 0)
+                if (line.text.trim().length > 0)
                     bytes = bytes.concat(getCoCoLine(line.text));
             }
 
@@ -706,16 +735,15 @@ function activate(context) {
 
             fs.writeFileSync(path.join(tempdir, xroar_snapshot_temp), before_read);
 
-            if(fs.existsSync(xroar_path)) {
+            if (fs.existsSync(xroar_path)) {
                 tools.LaunchXroar(
                     path.parse(xroar_path).base,
                     xroar_root_dir,
                     path.join(tempdir, xroar_snapshot_temp)
                 );
             }
-            else
-            {
-                     vscode.window.showErrorMessage("XRoar not found: " + xroar_path);
+            else {
+                vscode.window.showErrorMessage("XRoar not found: " + xroar_path);
             }
         }
     });
