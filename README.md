@@ -20,14 +20,16 @@ The extension adds several features to the VS Code Command Palette (accessed by 
 I have tried to simplify the settings from previous versions so that it only includes a few simple settings.
 
 * `Renumber Increment`: The increment used when renumbering BASIC. (10, 20, 30, etc....)
-* `XRoar Path`: The path to your XRoar executable. Examples show what your path might look like for Windows, Linux, and Mac.
-* `Snapshot Filenames`: These are the snapshots that the extension will use when launching XRoar. They will be created automatically in the XRoar executable directory. You don't need to change these filenames, but you can if you want.
+* `Temp Directory`: The extension needs access to a writable directory to create the snapshots it will use when launching XRoar. **You will need to change this to some directory on your local machine.**
+* `XRoar Path`: The path to your XRoar executable. Examples show what your path might look like for Windows, Linux, and Mac. **You will need to change this to your XRoar executable.**
+* `Snapshot Filenames`: These are the snapshots that the extension will use when launching XRoar. They will be created automatically in the Temp directory. You don't need to change these filenames, but you can if you want.
 
-![](2024-01-07-17-05-12.png)
+![](2024-01-07-17-07-28.png)
 
-## Known Issues
+## Other
 
-* Currently ONLY supports CoCo3 Disk Extended. Your XRoar installation should have "coco3.rom" and "disk11.rom" available...
+* This is a work in progress, and there are probably going to be 
+* Currently ONLY supports CoCo3 Disk Extended. Your XRoar installation should have "coco3.rom" and "disk11.rom" available, and be able to be launched like this:
 
 ![](2024-01-07-09-41-02.png)
 
