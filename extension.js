@@ -953,7 +953,7 @@ function coCoBasicReplace(inStr) {
 
                         for (let keyword in BasicReplacements) {
                             //add an exception for "-" in a data statement
-                            if (keyword === "\\-" && match_string.startsWith("DATA")) {
+                            if (keyword === "\-" && match_string.startsWith("DATA")) {
                                 //Console.log("skip");
                             } else {
                                 // console.log("match: " + keyword);
