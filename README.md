@@ -1,6 +1,6 @@
 # CoCo Tools README
 
-CoCoTools is a VS Code extension that helps automate a Tandy Color Computer BASIC development.
+CoCoTools is a [VS Code extension](https://marketplace.visualstudio.com/items?itemName=jasonpittman.cocotools) that helps automate a Tandy Color Computer BASIC development.
 
 ## Features
 
