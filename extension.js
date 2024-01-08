@@ -713,7 +713,7 @@ function activate(context) {
             }
             else
             {
-                     vscode.window.showErrorMessage("XRoar not found: " + exc.stdout.toString());
+                     vscode.window.showErrorMessage("XRoar not found: " + xroar_path);
             }
         }
     });
