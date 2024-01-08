@@ -4,10 +4,11 @@
     "author": "Jason Pittman",
     "displayName": "COCOTools",
     "description": "Tools to help you develop in BASIC/C/ASM for the Tandy color Computer in a modern IDE",
-    "version": "0.0.5",
+    "version": "0.1.0",
     "icon": "images/icon.png",
+    "repository": "https://github.com/jsonpittman/CoCoTools",
     "engines": {
-        "vscode": "^1.29.0"
+        "vscode": "^1.74.0"
     },
     "categories": [
         "Other"
@@ -96,7 +97,7 @@
     },
     "devDependencies": {
         "typescript": "^2.6.1",
-        "vscode": "^1.1.21",
+        "vscode": "^1.74.0",
         "eslint": "^4.11.0",
         "@types/node": "^8.10.25",
         "@types/mocha": "^2.2.42"
