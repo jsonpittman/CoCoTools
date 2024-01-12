@@ -945,57 +945,74 @@ function coCoBasicReplace(inStr) {
     for (let i = 0; i < parts.length; i++) {
         if (i % 2 === 0 && parts[i].length > 0) {
             //if there is a "'" comment arbitrarily in the string, we only want to parse characters up to it
-            let indx = parts[i].indexOf("'");
-            if (indx > -1)
-                parts[i] = parts[i].substring(0, indx) + ":" + parts[i].substring(indx);
-        }
-    }
-    inStr = parts.join('"');
+            let remsplit = parts[i].split("'");
+            //if (indx > -1)
+            //    parts[i] = parts[i].substring(0, indx) + ":" + parts[i].substring(indx);
 
-    let commented_out = false;
-    let statementsplit = inStr.split(':');
-    for (let x = 0; x < statementsplit.length; x++) {
-        if (statementsplit[x].startsWith("REM")) {
-            statementsplit[x] = statementsplit[x].substring(4);
-            statementsplit[x] = String.fromCharCode(130) + " " + statementsplit[x];
-            commented_out = true;
-        }
+            for (let rs = 0; rs < remsplit.length; rs++) {
+                if (rs % 2 === 0 && remsplit[rs].length > 0) {
 
-        if (statementsplit[x].startsWith("'")) {
-            statementsplit[x] = statementsplit[x].substring(1);
-            statementsplit[x] = String.fromCharCode(131) + statementsplit[x];
-            commented_out = true;
-        }
 
-        if (!commented_out) {
-            parts = statementsplit[x].split('"');
 
-            for (let i = 0; i < parts.length; i++) {
-                if (i % 2 === 0) {
-                    if (parts[i].length > 0) {
-                        //if there is a "'" comment arbitrarily in the string, we only want to parse characters up to it
-                        let indx = parts[i].indexOf("'");
-                        if (indx === -1)
-                            indx = parts[i].length;
-                        let match_string = parts[i].substring(0, indx);
+                    //inStr = parts.join('"');
 
-                        for (let keyword in BasicReplacements) {
-                            //add an exception for "-" in a data statement
-                            if (keyword === "\-" && match_string.startsWith("DATA")) {
-                                //Console.log("skip");
-                            } else {
-                                // console.log("match: " + keyword);
+                    // let commented_out = false;
+                    //colonIndex = 0;
 
-                                let regex = new RegExp(keyword, 'g');
-                                match_string = match_string.replace(regex, BasicReplacements[keyword]);
+                    let commented_out = false;
+                    let statementsplit = remsplit[rs].split(':');
+                    //colonIndex = 0;
+                    for (let x = 0; x < statementsplit.length; x++) {
+
+                        if (statementsplit[x].startsWith("REM")) {
+                            statementsplit[x] = statementsplit[x].substring(4);
+                            statementsplit[x] = String.fromCharCode(130) + " " + statementsplit[x];
+                            commented_out = true;
+                        }
+
+                        if (statementsplit[x].startsWith("'")) {
+                            statementsplit[x] = statementsplit[x].substring(1);
+                            statementsplit[x] = String.fromCharCode(131) + statementsplit[x];
+                            commented_out = true;
+                        }
+
+                        if (!commented_out) {
+                            // parts = statementsplit[x].split('"');
+
+                            for (let ss = 0; ss < statementsplit.length; ss++) {
+                                // if (ss % 2 === 0) {
+                                    //if there is a "'" comment arbitrarily in the string, we only want to parse characters up to it
+                                    let indx = statementsplit[ss].indexOf("'");
+                                    if (indx === -1)
+                                        indx = statementsplit[ss].length;
+                                    let match_string = statementsplit[ss].substring(0, indx);
+
+                                    for (let keyword in BasicReplacements) {
+                                        //add an exception for "-" in a data statement
+                                        if (keyword === "\-" && match_string.startsWith("DATA")) {
+                                            //Console.log("skip");
+                                        } else {
+                                            // console.log("match: " + keyword);
+
+                                            let regex = new RegExp(keyword, 'g');
+                                            match_string = match_string.replace(regex, BasicReplacements[keyword]);
+                                        }
+                                    }
+                                    statementsplit[ss] = match_string;
+                                // statementsplit[x] = parts.join('"');
+                                // }
+
                             }
                         }
-                        parts[i] = match_string;
                     }
+
+
+                    remsplit[rs] = statementsplit.join(':');
                 }
+                // return ln + ' ' + statementsplit.join(':');
             }
-            statementsplit[x] = parts.join('"');
+    parts[i] = remsplit.join('"');
         }
     }
-    return ln + ' ' + statementsplit.join(':');
+    return ln + ' ' + parts.join('"');
 }
