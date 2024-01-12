@@ -4,7 +4,6 @@ const workbenchConfig = vscode.workspace.getConfiguration('cocotools');
 const fs = require('fs');
 
 var renumber_increment = workbenchConfig.get('renumberIncrement');
-
 var xroar_path = workbenchConfig.get('xroarPath');
 var xroar_root_dir; // = path.dirname(xroar_path);
 var xroar_snapshot_template = workbenchConfig.get('xroarSnapshotTemplate');
@@ -12,7 +11,6 @@ var tempdir = workbenchConfig.get('tempDirectory');
 var xroar_snapshot_temp = workbenchConfig.get('xroarSnapshotTemp');
 
 const xroar_start = 458907; //position in snapshot file where memory starts
-
 var incr = -1;
 
 // starting memory locations for various emulators
@@ -945,57 +943,81 @@ function coCoBasicReplace(inStr) {
     for (let i = 0; i < parts.length; i++) {
         if (i % 2 === 0 && parts[i].length > 0) {
             //if there is a "'" comment arbitrarily in the string, we only want to parse characters up to it
-            let indx = parts[i].indexOf("'");
-            if (indx > -1)
-                parts[i] = parts[i].substring(0, indx) + ":" + parts[i].substring(indx);
-        }
-    }
-    inStr = parts.join('"');
+            let remsplit = parts[i].split("'");
+            //if (indx > -1)
+            //    parts[i] = parts[i].substring(0, indx) + ":" + parts[i].substring(indx);
 
-    let commented_out = false;
-    let statementsplit = inStr.split(':');
-    for (let x = 0; x < statementsplit.length; x++) {
-        if (statementsplit[x].startsWith("REM")) {
-            statementsplit[x] = statementsplit[x].substring(4);
-            statementsplit[x] = String.fromCharCode(130) + " " + statementsplit[x];
-            commented_out = true;
-        }
+            for (let rs = 0; rs < remsplit.length; rs++) {
+                if (rs % 2 === 0 && remsplit[i].length > 0) {
 
-        if (statementsplit[x].startsWith("'")) {
-            statementsplit[x] = statementsplit[x].substring(1);
-            statementsplit[x] = String.fromCharCode(131) + statementsplit[x];
-            commented_out = true;
-        }
 
-        if (!commented_out) {
-            parts = statementsplit[x].split('"');
 
-            for (let i = 0; i < parts.length; i++) {
-                if (i % 2 === 0) {
-                    if (parts[i].length > 0) {
-                        //if there is a "'" comment arbitrarily in the string, we only want to parse characters up to it
-                        let indx = parts[i].indexOf("'");
-                        if (indx === -1)
-                            indx = parts[i].length;
-                        let match_string = parts[i].substring(0, indx);
+                    //inStr = parts.join('"');
 
+<<<<<<< Updated upstream
                         for (let keyword in BasicReplacements) {
                             //add an exception for "-" in a data statement
                             if (keyword === "\\-" && match_string.startsWith("DATA")) {
                                 //Console.log("skip");
                             } else {
                                 // console.log("match: " + keyword);
+=======
+                    // let commented_out = false;
+                    let statementsplit = inStr.split(':');
+                    //colonIndex = 0;
+>>>>>>> Stashed changes
 
-                                let regex = new RegExp(keyword, 'g');
-                                match_string = match_string.replace(regex, BasicReplacements[keyword]);
-                            }
+                    for (let x = 0; x < statementsplit.length; x++) {
+                        let commented_out = false;
+                        let statementsplit = statementsplit[x].split(':');
+                        //colonIndex = 0;
+
+                        if (statementsplit[x].startsWith("REM")) {
+                            statementsplit[x] = statementsplit[x].substring(4);
+                            statementsplit[x] = String.fromCharCode(130) + " " + statementsplit[x];
+                            commented_out = true;
                         }
-                        parts[i] = match_string;
+
+                        if (statementsplit[x].startsWith("'")) {
+                            statementsplit[x] = statementsplit[x].substring(1);
+                            statementsplit[x] = String.fromCharCode(131) + statementsplit[x];
+                            commented_out = true;
+                        }
+
+                        if (!commented_out) {
+                            parts = quotesplit[x].split('"');
+
+                            for (let i = 0; i < quotesplit.length; i++) {
+                                if (i % 2 === 0 && quotesplit[i].length > 0) {
+                                    //if there is a "'" comment arbitrarily in the string, we only want to parse characters up to it
+                                    let indx = quotesplit[i].indexOf("'");
+                                    if (indx === -1)
+                                        indx = quotesplit[i].length;
+                                    let match_string = quotesplit[i].substring(0, indx);
+
+                                    for (let keyword in BasicReplacements) {
+                                        //add an exception for "-" in a data statement
+                                        if (keyword === "\-" && match_string.startsWith("DATA")) {
+                                            //Console.log("skip");
+                                        } else {
+                                            // console.log("match: " + keyword);
+
+                                            let regex = new RegExp(keyword, 'g');
+                                            match_string = match_string.replace(regex, BasicReplacements[keyword]);
+                                        }
+                                    }
+                                    quotesplit[i] = match_string;
+                                }
+
+                            }
+                            quotesplit[x] = parts.join('"');
+                        }
                     }
+
+
                 }
+                return ln + ' ' + statementsplit.join(':');
             }
-            statementsplit[x] = parts.join('"');
         }
     }
-    return ln + ' ' + statementsplit.join(':');
 }
