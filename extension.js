@@ -28,249 +28,7 @@ var mem_step = coco3_program_start;
 const tools = require('./tools');
 const path = require('path');
 const snaps = require('./snapshots');
-
-class JumpInfo {
-    constructor() {
-        this.index = 0;
-        this.original_str = '';
-        this.new_str = '';
-    }
-}
-
-class LineInfo {
-    constructor() {
-        this.LineNumber = 0;
-        this.NewLineNumber = 0;
-        this._originalLine = '';
-        this.Jumps = [];
-    }
-
-    getOriginalLine() {
-        return this._originalLine;
-    }
-
-    setOriginalLine(value) {
-        this._originalLine = value;
-        let first = this._originalLine.slice(0, this._originalLine.indexOf(' '));
-        if (first.length == 0) {
-            first = "1";
-            this._originalLine = " " + this._originalLine;
-        }
-        this.LineNumber = parseInt(first);
-    }
-
-    getNewLine() {
-        let newLine = this.getOriginalLine();
-
-        this.Jumps.sort((a, b) => b.index - a.index).forEach(j => {
-            let templine = newLine;
-            templine = newLine.slice(0, j.index);
-            templine += j.new_str;
-            templine += newLine.slice(j.index + j.original_str.length);
-            newLine = templine;
-        });
-
-        if (newLine.trim().length == 0)
-            return "";
-
-        if (isNaN(newLine[0])) {
-            newLine = "1 " + newLine;
-        }
-
-        let stIndex = newLine.indexOf(' ');
-        newLine = newLine.slice(stIndex);
-        newLine = this.NewLineNumber + newLine;
-
-        return newLine;
-    }
-}
-
-function processBasic() {
-    let list = [];
-    for (let line of lines) {
-        let l = new LineInfo();
-        l.setOriginalLine(line);
-        list.push(l);
-    }
-
-    let newLineNum = renumber_increment;
-    for (let l of list) {
-        if (l.getOriginalLine().trim().length > 0) {
-            l.NewLineNumber = newLineNum;
-            newLineNum += renumber_increment;
-        }
-    }
-
-    let keywords = ["GOTO", "GOSUB", "THEN", "ELSE"];
-
-    for (let l of list) {
-        var quoteIndices = [];
-        for (var i = 0; i < l.getOriginalLine().length; i++) {
-            if (l.getOriginalLine()[i] === '"') {
-                quoteIndices.push(i);
-            }
-        }
-
-        for (let keyword of keywords) {
-            let matchloc = 0;
-            matchloc = l.getOriginalLine().toUpperCase().indexOf(keyword, matchloc);
-            while (matchloc > -1) {
-                //ignore if this match is inside quotes
-
-                let inQuote = false;
-                for (x = 0; x < quoteIndices.length - 1; x += 2) {
-                    if (matchloc >= quoteIndices[x] && matchloc < quoteIndices[x + 1])
-                        inQuote = true;
-                }
-
-                if (!inQuote) {
-
-                    let j = new JumpInfo();
-                    j.index = matchloc;
-                    j.original_str = l.getOriginalLine().substr(matchloc, keyword.length);
-
-                    let number_found = false;
-                    let space_found = false;
-
-                    let originalLineStr = "";
-
-                    for (let i = j.index + keyword.length; i < l.getOriginalLine().length; i++) {
-                        if (l.getOriginalLine().charCodeAt(i) === 32) {
-                            if (!space_found) {
-                                j.original_str += l.getOriginalLine()[i];
-                                space_found = true;
-                            } else {
-                                break;
-                            }
-                        }
-                        else if ((l.getOriginalLine().charCodeAt(i) >= 48 && l.getOriginalLine().charCodeAt(i) <= 57) || l.getOriginalLine().charCodeAt(i) == 44) {
-                            j.original_str += l.getOriginalLine()[i];
-                            originalLineStr += l.getOriginalLine()[i];
-                            number_found = true;
-                        }
-                        else {
-                            break;
-                        }
-                    }
-
-                    if (number_found) {
-                        l.Jumps.push(j);
-                    }
-                }
-                matchloc = l.getOriginalLine().indexOf(keyword, matchloc + keyword.length);
-            }
-        }
-    }
-
-    var err = false;
-
-    list.filter(l => l.Jumps.length > 0).forEach(l => {
-        for (let x = 0; x < l.Jumps.length; x++) {
-            let j = l.Jumps[x];
-            let lineNumStart = 0;
-            for (let y = 0; y <= j.original_str.length; y++) {
-                let y_val = j.original_str.charCodeAt(y);
-                if (y_val >= 48 && y_val <= 57) {
-                    lineNumStart = y;
-                    break;
-                }
-            }
-
-            let splitLineDest = j.original_str.substring(lineNumStart).split(",");
-            for (let y = 0; y < splitLineDest.length; y++) {
-                let linenum = splitLineDest[y];
-                let findLine = list.find(s => s.LineNumber == parseInt(linenum));
-                if (findLine == null) {
-                    vscode.window.showErrorMessage("Error on Line " + l.LineNumber + ": Line not found: " + linenum);
-                    err = true;
-                    return false;
-                }
-
-                splitLineDest[y] = findLine.NewLineNumber.toString();
-            }
-
-            j.new_str = j.original_str.substring(0, lineNumStart);
-            j.new_str += splitLineDest.join(",");
-        }
-    });
-    let newLines = [];
-    for (let l of list) {
-        newLines.push(l.getNewLine());
-    }
-
-    lines = newLines;
-    return err;
-}
-
-
-// class Bas_Line {
-//     // object to represent a line of basic code,
-//     // with original and new line numbers
-
-//     constructor(line) {
-//         var mtch = line.match(/^\d+/);
-//         if (mtch != null)
-//             this.original_line_num = parseInt(mtch[0]);
-//         else
-//             this.original_line_num = "";
-//         this.original_line = line.substring(this.original_line_num.toString().length).trim();
-//     }
-
-//     get original_line_num() {
-//         return this._original_line_num;
-//     }
-//     set original_line_num(value) {
-//         this._original_line_num = value;
-//     }
-
-//     get original_line() {
-//         return this._original_line;
-//     }
-//     set original_line(value) {
-//         this._original_line = value;
-//     }
-
-//     get new_line_num() {
-//         return this._new_line_num;
-//     }
-//     set new_line_num(new_line_num) {
-//         this._new_line_num = new_line_num;
-//     }
-
-
-//     get is_block_header() {
-//         return this._is_block_header;
-//     }
-//     set is_block_header(val) {
-//         this._is_block_header = val;
-//     }
-
-//     // set line_str(new_neline_str) {
-//     //     this._line_str = new_line_str;
-//     // }
-//     get line_str() {
-//         return this._line_str;
-//     }
-//     set line_str(value) {
-//         this._line_str = value;
-//     }
-
-//     get new_str() {
-//         //return the line with new line number
-//         return this.new_line_num + ' ' + this.original_line;
-//     }
-//     get line_num() {
-//         return this._line_num;
-//     }
-
-//     get ignore() {
-//         //ignore this line if blank
-//         if (this.line_str.length == 0)
-//             return true;
-//         else
-//             return false;
-//     }
-// }
+const basicLineFunctions = require('./basicLineFunctions')
 
 // function KeywordRenumber(lines, keyword) {
 //     lines.forEach(line => {
@@ -364,49 +122,7 @@ function activate(context) {
             var line;
 
             for (ln = 0; ln < line_count; ln++) {
-                //this line of text
-                var original_line = editor.document.lineAt(ln).text.trim();
-
-                let linenum = original_line.slice(0, original_line.indexOf(' '));
-                let lineremainder = original_line.slice(original_line.indexOf(' '));
-
-                let parts = lineremainder.split('"');
-
-
-                for (let i = 0; i < parts.length; i++) {
-                    if (i % 2 === 0 && parts[i].length > 0) {
-                        let text = parts[i];
-
-                        var comment_location = -1;
-                        comment_location = text.indexOf("'");
-                        if (comment_location === -1)
-                            comment_location = text.indexOf("REM");
-
-                        if (comment_location > -1) {
-                            let text_before_comment = text.slice(0, comment_location);
-                            let text_after_comment = text.slice(comment_location);
-                            text_before_comment = text_before_comment.replace(/\s+/g, '');
-                            parts[i] = text_before_comment + text_after_comment;
-                        }
-                        else {
-                            text = text.replace(/\s+/g, '');
-                            parts[i] = text;
-                        }
-
-                        // if (comment_location > -1) {
-                        //     text = text.slice(0, comment_location);
-                        // }
-
-                        // text = text.replace(/\s+/g, '');
-                        // parts[i] = text;
-                    }
-                }
-
-
-                newLine = parts.join('"');
-                lines.push(linenum + " " + newLine);
-
-
+                lines.push(basicLineFunctions.removeSpaces(editor.document.lineAt(ln).text.trim()));
             }
             for (ls = 0; ls < lines.length; ls++) {
                 if (ls >= editor.document.lines) {
@@ -442,26 +158,7 @@ function activate(context) {
             var line;
 
             for (ln = 0; ln < line_count; ln++) {
-                //this line of text
-
-
-                var original_line = editor.document.lineAt(ln).text.trim();
-                var firstSpace = original_line.indexOf(' ');
-                if (firstSpace > -1) {
-                    var lineNum = original_line.slice(0, firstSpace);
-                    var remainingLine = original_line.slice(firstSpace);
-                    remainingLine = remainingLine.trim();
-                    original_line = lineNum + ' ' + remainingLine;
-                }
-                let parts = original_line.split('"');
-
-                for (let i = 0; i < parts.length; i++) {
-                    if (i % 2 === 0 && parts[i].length > 0) {
-                        parts[i] = parts[i].toUpperCase();
-                    }
-                }
-                newLine = parts.join('"');
-                lines.push(newLine);
+                lines.push(basicLineFunctions.format(editor.document.lineAt(ln).text.trim()));
             }
             for (ls = 0; ls < lines.length; ls++) {
                 if (ls >= editor.document.lines) {
@@ -475,8 +172,6 @@ function activate(context) {
 
             vscode.workspace.applyEdit(edit);
             vscode.window.showInformationMessage('Code Formatted!');
-
-
         }
     }
 
@@ -565,7 +260,10 @@ function activate(context) {
                 // }
             }
 
-            let ret = processBasic();
+            var lineObj = { lineCollection: lines };
+
+            let renumResult = basicLineFunctions.renumber(lineObj);
+
 
             // if (selectionMode) {
             //     var return_line = new Bas_Line("RETURN");
@@ -581,58 +279,8 @@ function activate(context) {
             //     en += 1;
             // }
 
-            // //add new line numbers
-            // for (ln = 0; ln < linelist.length; ln++) {
-            //     if (selectionMode && ln >= st && ln < en) {
-            //         linelist[ln].new_line_num = selection_line_start;
-            //         selection_line_start += renumber_increment;
-            //     }
-            //     else {
-            //         if (linelist[ln].is_block_header) { //do nothing with numbering of this block
-            //             block_start = linelist[ln].block_start;
-            //             block_end = linelist[ln].block_end;
-            //             in_RenumBlock = true;
-            //         }
-
-            //         if (!in_RenumBlock) {
-            //             linelist[ln].new_line_num = line_num;
-            //             line_num += renumber_increment;
-            //         }
-            //         else {
-            //             linelist[ln].new_line_num = linelist[ln].original_line_num;
-
-            //             if (linelist[ln].new_line_num == block_end)
-            //                 in_RenumBlock = false;
-            //         }
-            //     }
-            // }
-
-            // //var testline = linelist.find(x => x.original_line_num == 170);
-
-            // //sort
-            // linelist = linelist.sort((a, b) => {
-            //     if (a.new_line_num > b.new_line_num)
-            //         return 1;
-            //     else
-            //         return -1;
-            // });
-
-            // KeywordRenumber(linelist, "GOTO");
-            // KeywordRenumber(linelist, "GOSUB");
-            // KeywordRenumber(linelist, "THEN");
-            // KeywordRenumber(linelist, "ELSE");
-            // //Renumber(linelist, "RUN"); Is this needed?
-            // for (ls = 0; ls < linelist.length; ls++) {
-            //     if (ls >= editor.document.lineCount) {
-            //         edit.replace(editor.document.uri, line.range, line.text += "\r\n" + linelist[ls].new_str);
-            //     }
-            //     else {
-            //         line = editor.document.lineAt(ls);
-            //         edit.replace(editor.document.uri, line.range, linelist[ls].new_str);
-            //     }
-            // }
-
-            if (!ret) {
+            if (!renumResult) {
+                lines = lineObj.lineCollection;
                 for (ls = 0; ls < lines.length; ls++) {
                     if (ls >= editor.document.lines) {
                         edit.replace(editor.document.uri, line.range, line.text += "\r\n" + lines[ls]);
@@ -679,6 +327,8 @@ function activate(context) {
             prog_st = coco3_start;
             mem_step = coco3_program_start;
 
+
+
             var linelist = []; //list of Bas_Line objects...one for each line of basic code
 
             let edit = new vscode.WorkspaceEdit();
@@ -696,13 +346,31 @@ function activate(context) {
                     en++;
 
             let bytes = [];
+            
+
+
+            var lines = [];
 
             //build array of old and new line numbers
             for (ls = st; ls <= en; ls++) {
                 let line = editor.document.lineAt(ls);
-                if (line.text.trim().length > 0)
+                if (line.text.trim().length > 0){
+
+                    lines.push(line.text.trim());
+                    // lineObj.lines.push(line.text);
+
                     bytes = bytes.concat(getCoCoLine(line.text));
+                }
             }
+            var lineObj = {
+                lineCollection: lines,
+                incr: 1,
+                prog_st: coco3_start,
+                mem_step: coco3_program_start,
+                bytes: []
+            };
+
+            basicLineFunctions.tokenize(lineObj);
 
             bytes.push(0);
             bytes.push(0);
