@@ -1,53 +1,66 @@
 const vscode = require('vscode');
-const workbenchConfig = vscode.workspace.getConfiguration('cocotools');
+var workbenchConfig = vscode.workspace.getConfiguration('cocotools');
 
 const fs = require('fs');
 
-var xroar_path = workbenchConfig.get('xroarPath');
+var xroar_path;
 var xroar_root_dir; // = path.dirname(xroar_path);
 // var xroar_snapshot_template = workbenchConfig.get('xroarSnapshotTemplate');
-var tempdir = workbenchConfig.get('tempDirectory');
-var xroar_snapshot_temp = workbenchConfig.get('xroarSnapshotTemp');
-var machine_type = workbenchConfig.get('machineType');
+var tempdir;
+var xroar_snapshot_temp;
+var machine_type;
 var xroar_start = 0;
 var mem_start_a = 0;
 var mem_start_b = 0;
 
+
+loadOptions = function () {
+    workbenchConfig = vscode.workspace.getConfiguration('cocotools');
+    xroar_path = workbenchConfig.get('xroarPath');
+    xroar_root_dir; // = path.dirname(xroar_path);
+    tempdir = workbenchConfig.get('tempDirectory');
+    xroar_snapshot_temp = workbenchConfig.get('xroarSnapshotTemp');
+    machine_type = workbenchConfig.get('machineType');
+
+    switch (machine_type) {
+        case "CoCo 1":
+            xroar_snapshot_template = "coco.snp";
+            // xroar_start = 33053;
+            // coco_program_start = 6147;
+            xroar_start = 167;
+            // coco_program_start = 1537;
+            // coco_program_start = 9729;
+            mem_start_a = 38; //[25]
+            mem_start_b = 1; //[26]
+            break;
+        case "CoCo 2B":
+            xroar_snapshot_template = "coco2_decb.snp";
+            xroar_start = 175;
+            mem_start_a = 38; //[25]
+            mem_start_b = 1; //[26]
+            break;
+        case "CoCo 3":
+            xroar_snapshot_template = "coco3_decb.snp";
+            xroar_start = 458907;
+            mem_start_a = 38; //[25]
+            mem_start_b = 1; //[26]
+            break;
+        case "MC10":
+            xroar_snapshot_template = "mc10.snp";
+            xroar_start = 21201;
+            break;
+        default:
+            xroar_snapshot_template = "coco3_decb.snp";
+            xroar_start = 167;
+            break;
+    }
+}
+
+loadOptions();
+
 // var coco_start = 38;
 // var coco_program_start = 9729;
 
-switch (machine_type) {
-    case "CoCo 1":
-        xroar_snapshot_template = "coco.snp";
-        // xroar_start = 33053;
-        // coco_program_start = 6147;
-        xroar_start = 167;
-        // coco_program_start = 1537;
-        // coco_program_start = 9729;
-        mem_start_a = 38; //[25]
-        mem_start_b = 1; //[26]
-        break;
-    case "CoCo 2B":
-        xroar_snapshot_template = "coco2_decb.snp";
-        xroar_start = 175;
-        mem_start_a = 38; //[25]
-        mem_start_b = 1; //[26]
-        break;
-    case "CoCo 3":
-        xroar_snapshot_template = "coco3_decb.snp";
-        xroar_start = 458907;
-        mem_start_a = 38; //[25]
-        mem_start_b = 1; //[26]
-        break;
-    case "MC10":
-        xroar_snapshot_template = "mc10.snp";
-        xroar_start = 21201;
-        break;
-    default:
-        xroar_snapshot_template = "coco3_decb.snp";
-        xroar_start = 167;
-        break;
-}
 
 // const xroar_start = 458907; //position in snapshot file where memory starts
 // const xroar_start = 167; //position in snapshot file where memory starts
@@ -62,7 +75,7 @@ switch (machine_type) {
 const tools = require('./tools');
 const path = require('path');
 let snaps = null;
-    // snaps = require('./snapshots_coco3_decb');
+// snaps = require('./snapshots_coco3_decb');
 // const snaps_coco = require('./snapshots_coco');
 const basicLineFunctions = require('./basicLineFunctions')
 
@@ -141,6 +154,7 @@ let lines = [];
 function activate(context) {
     let removespaces = vscode.commands.registerCommand('cocotools.removespaces', async () => {
         if (path.extname(vscode.window.activeTextEditor.document.fileName).toUpperCase() == '.BAS') {
+            loadOptions();
             let editor = vscode.window.activeTextEditor;
             if (!editor) {
                 return; // No open text editor
@@ -177,6 +191,7 @@ function activate(context) {
 
     let format = vscode.commands.registerCommand('cocotools.format', async () => {
         if (path.extname(vscode.window.activeTextEditor.document.fileName).toUpperCase() == '.BAS') {
+            loadOptions();
             let editor = vscode.window.activeTextEditor;
             if (!editor) {
                 return; // No open text editor
@@ -217,6 +232,7 @@ function activate(context) {
 
     let renumber = vscode.commands.registerCommand('cocotools.renumber', async () => {
         if (path.extname(vscode.window.activeTextEditor.document.fileName).toUpperCase() == '.BAS') {
+            loadOptions();
             let editor = vscode.window.activeTextEditor;
             if (!editor) {
                 return; // No open text editor
@@ -344,6 +360,7 @@ function activate(context) {
 
     let xroar = vscode.commands.registerCommand('cocotools.xroar', function () {
         if (path.extname(vscode.window.activeTextEditor.document.fileName).toUpperCase() == '.BAS') {
+            loadOptions();
             let editor = vscode.window.activeTextEditor;
             if (!editor) {
                 return; // No open text editor
@@ -358,7 +375,7 @@ function activate(context) {
                 snaps = require('./snapshots');
                 let snap = null;
 
-                switch(machine_type){
+                switch (machine_type) {
                     case "CoCo 1":
                         snap = new snaps.coco;
                         fs.writeFileSync(temppath, snap);
@@ -387,7 +404,7 @@ function activate(context) {
             var st = vscode.window.activeTextEditor.selection.start.line;
             var en = vscode.window.activeTextEditor.selection.end.line;
 
-            if(st == en){
+            if (st == en) {
                 //nothing selected...run entire program
                 st = 0;
                 en = editor.document.lineCount - 1;
@@ -400,7 +417,7 @@ function activate(context) {
 
             for (ls = st; ls <= en; ls++) {
                 let line = editor.document.lineAt(ls);
-                if (line.text.trim().length > 0){
+                if (line.text.trim().length > 0) {
                     lines.push(line.text.trim());
                 }
             }
@@ -446,7 +463,7 @@ function activate(context) {
             };
 
             basicLineFunctions.tokenize(lineObj);
-            
+
 
             let mem_end_a = Math.floor((mem_start_a * 256 + mem_start_b + lineObj.bytes.length) / 256);
             let mem_end_b = ((mem_start_a * 256 + mem_start_b + lineObj.bytes.length) % 256) - 1;
@@ -459,9 +476,9 @@ function activate(context) {
             before_read[xroar_start + 25] = mem_start_a;
             before_read[xroar_start + 26] = mem_start_b;
             before_read[xroar_start + 27] = mem_end_a;
-            before_read[xroar_start + 28] = mem_end_b ;
+            before_read[xroar_start + 28] = mem_end_b;
 
-            var start_byte = xroar_start + (mem_start_a * 256 ) + mem_start_b;
+            var start_byte = xroar_start + (mem_start_a * 256) + mem_start_b;
 
             // lineObj.mem_step = mem_start_a * 256 + mem_start_b;
 
