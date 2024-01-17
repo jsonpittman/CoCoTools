@@ -172,6 +172,8 @@ module.exports = {
     },
     tokenize: function (lineObj) {
         for (var x = 0; x < lineObj.lineCollection.length; x++) {
+
+
             line = coCoBasicReplace(lineObj.lineCollection[x]);
 
             //find line num
@@ -184,11 +186,12 @@ module.exports = {
             lineObj.incr += (line.length + 5);
 
             if (lineObj.incr > 255) {
-                lineObj.prog_st++;
+                lineObj.mem_start_a++;
+                lineObj.mem_start_b -= 256;
                 lineObj.incr -= 256;
             }
 
-            lineObj.bytes.push(lineObj.prog_st);
+            lineObj.bytes.push(lineObj.mem_start_a);
             lineObj.bytes.push(lineObj.incr);
 
             lineObj.bytes.push(Math.floor(line_num / 256));

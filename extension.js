@@ -10,21 +10,34 @@ var tempdir = workbenchConfig.get('tempDirectory');
 var xroar_snapshot_temp = workbenchConfig.get('xroarSnapshotTemp');
 var machine_type = workbenchConfig.get('machineType');
 var xroar_start = 0;
-var coco_start = 38;
-var coco_program_start = 9729;
+var mem_start_a = 0;
+var mem_start_b = 0;
+
+// var coco_start = 38;
+// var coco_program_start = 9729;
 
 switch (machine_type) {
     case "CoCo 1":
         xroar_snapshot_template = "coco.snp";
+        // xroar_start = 33053;
+        // coco_program_start = 6147;
         xroar_start = 167;
+        // coco_program_start = 1537;
+        // coco_program_start = 9729;
+        mem_start_a = 38; //[25]
+        mem_start_b = 1; //[26]
         break;
-    case "CoCo 2":
+    case "CoCo 2B":
         xroar_snapshot_template = "coco2_decb.snp";
-        xroar_start = 458907;
+        xroar_start = 175;
+        mem_start_a = 38; //[25]
+        mem_start_b = 1; //[26]
         break;
-    case "CoCo 3 DECB":
+    case "CoCo 3":
         xroar_snapshot_template = "coco3_decb.snp";
         xroar_start = 458907;
+        mem_start_a = 38; //[25]
+        mem_start_b = 1; //[26]
         break;
     case "MC10":
         xroar_snapshot_template = "mc10.snp";
@@ -350,11 +363,11 @@ function activate(context) {
                         snap = new snaps.coco;
                         fs.writeFileSync(temppath, snap);
                         break;
-                    case "CoCo 2":
+                    case "CoCo 2B":
                         snap = new snaps.coco2_decb;
                         fs.writeFileSync(temppath, snap);
                         break;
-                    case "CoCo 3 DECB":
+                    case "CoCo 3":
                         snap = new snaps.coco3_decb;
                         fs.writeFileSync(temppath, snap);
                         break;
@@ -391,22 +404,13 @@ function activate(context) {
                     lines.push(line.text.trim());
                 }
             }
-            var lineObj = {
-                lineCollection: lines,
-                incr: 1,
-                prog_st: coco_start,
-                mem_step: coco_program_start,
-                bytes: []
-            };
-
-            basicLineFunctions.tokenize(lineObj);
 
             let before_read = fs.readFileSync(path.join(tempdir, xroar_snapshot_template));
 
-            // before_read = fs.readFileSync(path.join(tempdir, "mc10_after.snp"));
+            // before_read = fs.readFileSync(path.join(tempdir, "coco2_after.snp"));
 
             // for(let i = 0; i < before_read.length - 2; i++){
-            //     if(before_read[i] == 38 && before_read[i + 1] == 1){
+            //      if(before_read[i] == 38 && before_read[i + 1] == 1 && before_read[i + 2] == 38){
             //         for(let j = i; j <= i+3; j++){
             //             console.log(j + " = " + before_read[j]);
             //         }
@@ -414,10 +418,11 @@ function activate(context) {
             //     }
             // }
 
+
             // write loaded snapshot for later use
-            // before_read = fs.readFileSync(path.join(tempdir, "mc10.snp"));
+            // before_read = fs.readFileSync(path.join(tempdir, "cpcp2_before.snp"));
             // require('fs').writeFile(
-            //     'C:/temp/mc10.json',
+            //     'C:/temp/coco2.json',
             //     JSON.stringify(before_read),
 
             //     function (err) {
@@ -427,11 +432,24 @@ function activate(context) {
             //     }
             // );
 
-            let mem_start_a = Math.floor(lineObj.mem_step / 256);
-            let mem_start_b = lineObj.mem_step % 256;
+            // let mem_start_a = Math.floor(lineObj.mem_step / 256);
+            // let mem_start_b = lineObj.mem_step % 256;
 
-            let mem_end_a = Math.floor((lineObj.mem_step + lineObj.bytes.length) / 256);
-            let mem_end_b = (lineObj.mem_step + lineObj.bytes.length) % 256;
+
+            var lineObj = {
+                lineCollection: lines,
+                incr: 1,
+                mem_start_a: mem_start_a,
+                mem_start_b: mem_start_b,
+                mem_step: 0,
+                bytes: []
+            };
+
+            basicLineFunctions.tokenize(lineObj);
+            
+
+            let mem_end_a = Math.floor((mem_start_a * 256 + mem_start_b + lineObj.bytes.length) / 256);
+            let mem_end_b = ((mem_start_a * 256 + mem_start_b + lineObj.bytes.length) % 256) - 1;
 
             // console.log("Before: " + before_read[xroar_start + 25] + " After: " + mem_start_a);
             // console.log("Before: " + before_read[xroar_start + 26] + " After: " + mem_start_b);
@@ -441,13 +459,29 @@ function activate(context) {
             before_read[xroar_start + 25] = mem_start_a;
             before_read[xroar_start + 26] = mem_start_b;
             before_read[xroar_start + 27] = mem_end_a;
-            before_read[xroar_start + 28] = mem_end_b - 1;
+            before_read[xroar_start + 28] = mem_end_b ;
+
+            var start_byte = xroar_start + (mem_start_a * 256 ) + mem_start_b;
+
+            // lineObj.mem_step = mem_start_a * 256 + mem_start_b;
 
             for (let i of lineObj.bytes) {
-                // console.log("Location: " + (xroar_start + mem_step) + " Before: " + before_read[xroar_start + mem_step] + " After: " + i);
-                before_read[xroar_start + lineObj.mem_step] = i;
-                lineObj.mem_step++;
+                // console.log("Location: " + (xroar_start + lineObj.mem_step) + " Before: " + before_read[xroar_start + lineObj.mem_step] + " After: " + i);
+                before_read[start_byte] = i;
+                start_byte++;
             }
+            // console.log("Before: " + before_read[33080] + " After: " + mem_start_a);
+            // console.log("Before: " + before_read[33081] + " After: " + mem_start_b);
+            // console.log("Before: " + before_read[33082] + " After: " + mem_end_a);
+            // console.log( " After: " + (mem_end_b - 1));
+
+
+            // before_read[33080] = mem_start_a;
+            // before_read[33081] = mem_start_b;
+            // before_read[33082] = mem_end_a;
+            // before_read[33083] = mem_end_b - 1;
+
+
 
             fs.writeFileSync(path.join(tempdir, xroar_snapshot_temp), before_read);
 

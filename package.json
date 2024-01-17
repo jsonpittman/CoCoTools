@@ -59,10 +59,11 @@
                 },
                 "cocotools.machineType": {
                     "type": "string",
-                    "default": "CoCo 3 DECB",
+                    "default": "CoCo 3",
                     "enum": [
                         "CoCo 1",
-                        "CoCo 3 DECB"
+                        "CoCo 2B",
+                        "CoCo 3"
                     ]
                 }
             }
