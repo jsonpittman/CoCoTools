@@ -3,8 +3,6 @@ const workbenchConfig = vscode.workspace.getConfiguration('cocotools');
 
 const fs = require('fs');
 
-var renumber_increment = workbenchConfig.get('renumberIncrement');
-
 var xroar_path = workbenchConfig.get('xroarPath');
 var xroar_root_dir; // = path.dirname(xroar_path);
 var xroar_snapshot_template = workbenchConfig.get('xroarSnapshotTemplate');
@@ -13,17 +11,12 @@ var xroar_snapshot_temp = workbenchConfig.get('xroarSnapshotTemp');
 
 const xroar_start = 458907; //position in snapshot file where memory starts
 
-var incr = -1;
-
 // starting memory locations for various emulators
 const coco3_start = 38;
 const coco3_program_start = 9729;
 
 //declare snapshot filenames
 const snap_coco3_decb = "snap_coco3_decb.snp";
-
-var prog_st = coco3_start;
-var mem_step = coco3_program_start;
 
 const tools = require('./tools');
 const path = require('path');
@@ -95,10 +88,10 @@ const basicLineFunctions = require('./basicLineFunctions')
 //     return return_num;
 // }
 
-async function getRenumberSelectionStartNum() {
-    let userInputWindow = await vscode.window.showInputBox({ prompt: 'Subroutine starting line number:' });
-    return parseInt(userInputWindow);
-}
+// async function getRenumberSelectionStartNum() {
+//     let userInputWindow = await vscode.window.showInputBox({ prompt: 'Subroutine starting line number:' });
+//     return parseInt(userInputWindow);
+// }
 
 let lines = [];
 
@@ -323,15 +316,6 @@ function activate(context) {
                 fs.writeFileSync(temppath, snap);
             }
 
-            incr = 1;
-            prog_st = coco3_start;
-            mem_step = coco3_program_start;
-
-
-
-            var linelist = []; //list of Bas_Line objects...one for each line of basic code
-
-            let edit = new vscode.WorkspaceEdit();
             var ls;
 
             var st = vscode.window.activeTextEditor.selection.start.line;
@@ -345,21 +329,13 @@ function activate(context) {
                 if (en < editor.document.lineCount)
                     en++;
 
-            let bytes = [];
-            
-
-
             var lines = [];
 
             //build array of old and new line numbers
             for (ls = st; ls <= en; ls++) {
                 let line = editor.document.lineAt(ls);
                 if (line.text.trim().length > 0){
-
                     lines.push(line.text.trim());
-                    // lineObj.lines.push(line.text);
-
-                    bytes = bytes.concat(getCoCoLine(line.text));
                 }
             }
             var lineObj = {
@@ -371,10 +347,6 @@ function activate(context) {
             };
 
             basicLineFunctions.tokenize(lineObj);
-
-            bytes.push(0);
-            bytes.push(0);
-            bytes.push(0);
 
             let before_read = fs.readFileSync(path.join(tempdir, xroar_snapshot_template));
 
@@ -390,13 +362,11 @@ function activate(context) {
             //     }
             // );
 
-            let mem_count = bytes.length;
+            let mem_start_a = Math.floor(lineObj.mem_step / 256);
+            let mem_start_b = lineObj.mem_step % 256;
 
-            let mem_start_a = Math.floor(mem_step / 256);
-            let mem_start_b = mem_step % 256;
-
-            let mem_end_a = Math.floor((mem_step + mem_count) / 256);
-            let mem_end_b = (mem_step + mem_count) % 256;
+            let mem_end_a = Math.floor((lineObj.mem_step + lineObj.bytes.length) / 256);
+            let mem_end_b = (lineObj.mem_step + lineObj.bytes.length) % 256;
 
             // console.log("Before: " + before_read[xroar_start + 25] + " After: " + mem_start_a);
             // console.log("Before: " + before_read[xroar_start + 26] + " After: " + mem_start_b);
@@ -408,10 +378,10 @@ function activate(context) {
             before_read[xroar_start + 27] = mem_end_a;
             before_read[xroar_start + 28] = mem_end_b - 1;
 
-            for (let i of bytes) {
+            for (let i of lineObj.bytes) {
                 // console.log("Location: " + (xroar_start + mem_step) + " Before: " + before_read[xroar_start + mem_step] + " After: " + i);
-                before_read[xroar_start + mem_step] = i;
-                mem_step++;
+                before_read[xroar_start + lineObj.mem_step] = i;
+                lineObj.mem_step++;
             }
 
             fs.writeFileSync(path.join(tempdir, xroar_snapshot_temp), before_read);
@@ -436,247 +406,3 @@ exports.activate = activate;
 function deactivate() {
 }
 exports.deactivate = deactivate;
-
-
-let BasicReplacements = {
-    "PALETTE": String.fromCharCode(227),
-    "PCLEAR": String.fromCharCode(192),
-    "PCLS": String.fromCharCode(188),
-    "PCOPY": String.fromCharCode(199),
-    "PLAY": String.fromCharCode(201),
-    "PMODE": String.fromCharCode(200),
-    "POKE": String.fromCharCode(146),
-    "PRESET": String.fromCharCode(190),
-    "HGET": String.fromCharCode(235),
-    "HLINE": String.fromCharCode(234),
-    "HPAINT": String.fromCharCode(232),
-    "HPRINT": String.fromCharCode(238),
-    "HPUT": String.fromCharCode(236),
-    "HRESET": String.fromCharCode(244),
-    "HSCREEN": String.fromCharCode(228),
-    "HSET": String.fromCharCode(243),
-    "HSTAT": String.fromCharCode(242),
-    "HBUFF": String.fromCharCode(237),
-    "HCIRCLE": String.fromCharCode(233),
-    "HCLS": String.fromCharCode(230),
-    "HCOLOR": String.fromCharCode(231),
-    "HDRAW": String.fromCharCode(245),
-    "HPOINT": String.fromCharCode(255, 171),
-    "ATTR": String.fromCharCode(248),
-    "AUDIO": String.fromCharCode(161),
-    "TO": String.fromCharCode(165),
-    "ON": String.fromCharCode(136),
-    "CIRCLE": String.fromCharCode(194),
-    "CLEAR": String.fromCharCode(149),
-    "LOAD": String.fromCharCode(211),
-    "CLOAD": String.fromCharCode(151),
-    "CLOSE": String.fromCharCode(154),
-    "CLS": String.fromCharCode(158),
-    "COLOR": String.fromCharCode(193),
-    "CONT": String.fromCharCode(147),
-    "CSAVE": String.fromCharCode(152),
-    "DEF": String.fromCharCode(185),
-    "DEL": String.fromCharCode(181),
-    "DIM": String.fromCharCode(140),
-    "DRAW": String.fromCharCode(198),
-    "EDIT": String.fromCharCode(182),
-    "END": String.fromCharCode(138),
-    "EXEC": String.fromCharCode(162),
-    "FOR": String.fromCharCode(128),
-    "STEP": String.fromCharCode(169),
-    "GET": String.fromCharCode(196),
-    "GO": String.fromCharCode(129),
-    "SUB": String.fromCharCode(166),
-    "IF": String.fromCharCode(133),
-    "THEN": String.fromCharCode(167),
-    "INPUT": String.fromCharCode(137),
-    "LET": String.fromCharCode(186),
-    "LINE": String.fromCharCode(187),
-    "LIST": String.fromCharCode(148),
-    "LLIST": String.fromCharCode(155),
-    "LOCATE": String.fromCharCode(241),
-    "LPOKE": String.fromCharCode(229),
-    "MOTOR": String.fromCharCode(159),
-    "NEW": String.fromCharCode(150),
-    "NEXT": String.fromCharCode(139),
-    "BRK": String.fromCharCode(240),
-    "ERR": String.fromCharCode(239),
-    "OPEN": String.fromCharCode(153),
-    "PAINT": String.fromCharCode(195),
-    "CMP": String.fromCharCode(246),
-    "RGB": String.fromCharCode(247),
-    "PRINT": String.fromCharCode(135),
-    "USING": String.fromCharCode(205),
-    "PSET": String.fromCharCode(189),
-    "PUT": String.fromCharCode(197),
-    "READ": String.fromCharCode(141),
-    //{"REM": String.fromCharCode(130),
-    //{"'": String.fromCharCode(131),
-    "RENUM": String.fromCharCode(203),
-    "RESET": String.fromCharCode(157),
-    "RESTORE": String.fromCharCode(143),
-    "RETURN": String.fromCharCode(144),
-    "RUN": String.fromCharCode(142),
-    "SCREEN": String.fromCharCode(191),
-    "SET": String.fromCharCode(156),
-    "SKIPF": String.fromCharCode(163),
-    "SOUND": String.fromCharCode(160),
-    "DSKI\\$": String.fromCharCode(223),
-    "STOP": String.fromCharCode(145),
-    "TROFF": String.fromCharCode(184),
-    "TRON": String.fromCharCode(183),
-    "WIDTH": String.fromCharCode(226),
-    "NOT": String.fromCharCode(168),
-    "AND": String.fromCharCode(176),
-    "OR": String.fromCharCode(177),
-    "<": String.fromCharCode(180),
-    "\=": String.fromCharCode(179),
-    ">": String.fromCharCode(178),
-    "\-": String.fromCharCode(172),
-    "\\*": String.fromCharCode(173),
-    "\\+": String.fromCharCode(171),
-    "/": String.fromCharCode(174),
-    "\\?": String.fromCharCode(135),
-    "ELSE": String.fromCharCode(58, 132),
-    "GOSUB": String.fromCharCode(129, 166),
-    "GOTO": String.fromCharCode(129, 165),
-    "MID\$": String.fromCharCode(255, 144),
-    "TIMER": String.fromCharCode(255, 159),
-    "ABS": String.fromCharCode(255, 130),
-    "ASC": String.fromCharCode(255, 138),
-    "ATN": String.fromCharCode(255, 148),
-    "BUTTON": String.fromCharCode(255, 170),
-    "CHR\\$": String.fromCharCode(255, 139),
-    "COS": String.fromCharCode(255, 149),
-    "EOF": String.fromCharCode(255, 140),
-    "ERLIN": String.fromCharCode(255, 173),
-    "ERNO": String.fromCharCode(255, 172),
-    "EXP": String.fromCharCode(255, 151),
-    "FIX": String.fromCharCode(255, 152),
-    "HEX\\$": String.fromCharCode(255, 156),
-    "INKEY\\$": String.fromCharCode(255, 146),
-    "INSTR": String.fromCharCode(255, 158),
-    "INT": String.fromCharCode(255, 129),
-    "JOYSTK": String.fromCharCode(255, 141),
-    //{"LEFT": String.fromCharCode(255, 142),
-    "LEN": String.fromCharCode(255, 135),
-    "LOG": String.fromCharCode(255, 153),
-    "LPEEK": String.fromCharCode(255, 169),
-    "MEM": String.fromCharCode(255, 147),
-    "PEEK": String.fromCharCode(255, 134),
-    "POINT": String.fromCharCode(255, 145),
-    "POS": String.fromCharCode(255, 154),
-    "PPOINT": String.fromCharCode(255, 160),
-    "RIGHT\\$": String.fromCharCode(255, 143),
-    "RND": String.fromCharCode(255, 132),
-    "SGN": String.fromCharCode(255, 128),
-    "SIN": String.fromCharCode(255, 133),
-    "STRING\\$": String.fromCharCode(255, 161),
-    "STR\\$": String.fromCharCode(255, 136),
-    "SQR": String.fromCharCode(255, 155),
-    "TAN": String.fromCharCode(255, 150),
-    "LEFT\\$": String.fromCharCode(255, 142),
-    "USR": String.fromCharCode(255, 131),
-    "VAL": String.fromCharCode(255, 137),
-    "VARPTR": String.fromCharCode(255, 157),
-    //{"'",string.Format("{0}{1}",(char)58,(char)131),
-    "FN": String.fromCharCode(204),
-    "DATA": String.fromCharCode(134),
-    "WRITE": String.fromCharCode(217)
-};
-
-function getCoCoLine(line) {
-    line = coCoBasicReplace(line);
-
-    //find line num
-    let st = line.indexOf(" ");
-    let line_num = parseInt(line.substring(0, st));
-    line = line.substring(st + 1);
-
-    let ret = [];
-
-    incr += (line.length + 5);
-
-    if (incr > 255) {
-        prog_st++;
-        incr -= 256;
-    }
-
-    ret.push(prog_st);
-    ret.push(incr);
-
-    ret.push(Math.floor(line_num / 256));
-    ret.push(line_num % 256);
-
-    for (let c of line)
-        ret.push(c.charCodeAt(0));
-    ret.push(0);
-
-    return ret;
-}
-
-function coCoBasicReplace(inStr) {
-    let ln = inStr.substring(0, inStr.indexOf(' ')); //save line num
-    inStr = inStr.substring(inStr.indexOf(' ') + 1); //remove line num
-
-    //basic allows a "'" comment to begin anywhere by inserting a ":" before it. Check for "'"
-    // that is not inside a "string" and insert a ":".
-    let parts = inStr.split('"');
-    var remFound = false;
-
-    for (let i = 0; i < parts.length; i++) {
-        if (i % 2 === 0 && parts[i].length > 0 && remFound === false) {
-            //if there is a "'" comment arbitrarily in the string, we only want to parse characters up to it
-            let remsplit = parts[i].split("'");
-            if (remsplit.length > 1) {
-                remFound = true;
-                remsplit[0] = remsplit[0] + ":";
-            }
-
-            if (remsplit.length > 0) {
-                let commented_out = false;
-                let statementsplit = remsplit[0].split(':');
-                for (let x = 0; x < statementsplit.length; x++) {
-
-                    if (statementsplit[x].startsWith("REM")) {
-                        statementsplit[x] = statementsplit[x].substring(4);
-                        statementsplit[x] = String.fromCharCode(130) + " " + statementsplit[x];
-                        commented_out = true;
-                    }
-
-                    // if (statementsplit[x].startsWith("'")) {
-                    //     statementsplit[x] = statementsplit[x].substring(1);
-                    //     statementsplit[x] = String.fromCharCode(131) + statementsplit[x];
-                    //     commented_out = true;
-                    // }
-
-                    if (!commented_out) {
-                        for (let ss = 0; ss < statementsplit.length; ss++) {
-                            let indx = statementsplit[ss].indexOf("'");
-                            if (indx === -1)
-                                indx = statementsplit[ss].length;
-                            let match_string = statementsplit[ss].substring(0, indx);
-
-                            for (let keyword in BasicReplacements) {
-                                //add an exception for "-" in a data statement
-                                if (keyword === "\-" && match_string.startsWith("DATA")) {
-                                    //Console.log("skip");
-                                } else {
-                                    // console.log("match: " + keyword);
-                                    let regex = new RegExp(keyword, 'g');
-                                    match_string = match_string.replace(regex, BasicReplacements[keyword]);
-                                }
-                            }
-                            statementsplit[ss] = match_string;
-                        }
-                    }
-                }
-
-
-                remsplit[0] = statementsplit.join(':');
-                parts[i] = remsplit.join(String.fromCharCode(131));
-            }
-        }
-    }
-    return ln + ' ' + parts.join('"');
-}
