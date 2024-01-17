@@ -52,15 +52,18 @@
                     "default": "c:\\temp",
                     "description": "A writable temp directory where the snapshots will be written"
                 },
-                "cocotools.xroarSnapshotTemplate": {
-                    "type": "string",
-                    "default": "coco3_decb.snp",
-                    "description": "Filename of the initial snapshot template to use when launching xroar (created in xroar directory)"
-                },
                 "cocotools.xroarSnapshotTemp": {
                     "type": "string",
                     "default": "temp.snp",
                     "description": "Filename of the temporary snapshot to use when launching xroar (created in xroar directory)"
+                },
+                "cocotools.machineType": {
+                    "type": "string",
+                    "default": "CoCo 3 DECB",
+                    "enum": [
+                        "CoCo 1",
+                        "CoCo 3 DECB"
+                    ]
                 }
             }
         },

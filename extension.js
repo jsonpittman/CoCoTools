@@ -5,22 +5,52 @@ const fs = require('fs');
 
 var xroar_path = workbenchConfig.get('xroarPath');
 var xroar_root_dir; // = path.dirname(xroar_path);
-var xroar_snapshot_template = workbenchConfig.get('xroarSnapshotTemplate');
+// var xroar_snapshot_template = workbenchConfig.get('xroarSnapshotTemplate');
 var tempdir = workbenchConfig.get('tempDirectory');
 var xroar_snapshot_temp = workbenchConfig.get('xroarSnapshotTemp');
+var machine_type = workbenchConfig.get('machineType');
+var xroar_start = 0;
+var coco_start = 38;
+var coco_program_start = 9729;
 
-const xroar_start = 458907; //position in snapshot file where memory starts
+switch (machine_type) {
+    case "CoCo 1":
+        xroar_snapshot_template = "coco.snp";
+        xroar_start = 167;
+        break;
+    case "CoCo 2":
+        xroar_snapshot_template = "coco2_decb.snp";
+        xroar_start = 458907;
+        break;
+    case "CoCo 3 DECB":
+        xroar_snapshot_template = "coco3_decb.snp";
+        xroar_start = 458907;
+        break;
+    case "MC10":
+        xroar_snapshot_template = "mc10.snp";
+        xroar_start = 21201;
+        break;
+    default:
+        xroar_snapshot_template = "coco3_decb.snp";
+        xroar_start = 167;
+        break;
+}
+
+// const xroar_start = 458907; //position in snapshot file where memory starts
+// const xroar_start = 167; //position in snapshot file where memory starts
 
 // starting memory locations for various emulators
-const coco3_start = 38;
-const coco3_program_start = 9729;
+// const coco3_start = 38;
+// const coco3_program_start = 9729;
 
 //declare snapshot filenames
-const snap_coco3_decb = "snap_coco3_decb.snp";
+// const snap_coco3_decb = "snap_coco3_decb.snp";
 
 const tools = require('./tools');
 const path = require('path');
-const snaps = require('./snapshots');
+let snaps = null;
+    // snaps = require('./snapshots_coco3_decb');
+// const snaps_coco = require('./snapshots_coco');
 const basicLineFunctions = require('./basicLineFunctions')
 
 // function KeywordRenumber(lines, keyword) {
@@ -312,8 +342,31 @@ function activate(context) {
             // write the template to the xroar directory if it does not exist
             var temppath = path.join(tempdir, xroar_snapshot_template);
             if (!fs.existsSync(temppath)) {
-                let snap = new snaps.coco3_decb;
-                fs.writeFileSync(temppath, snap);
+                snaps = require('./snapshots');
+                let snap = null;
+
+                switch(machine_type){
+                    case "CoCo 1":
+                        snap = new snaps.coco;
+                        fs.writeFileSync(temppath, snap);
+                        break;
+                    case "CoCo 2":
+                        snap = new snaps.coco2_decb;
+                        fs.writeFileSync(temppath, snap);
+                        break;
+                    case "CoCo 3 DECB":
+                        snap = new snaps.coco3_decb;
+                        fs.writeFileSync(temppath, snap);
+                        break;
+                    case "MC10":
+                        snap = new snaps.mc10;
+                        fs.writeFileSync(temppath, snap);
+                        break;
+                    default:
+                        snap = new snaps.coco3_decb;
+                        fs.writeFileSync(temppath, snap);
+                        break;
+                }
             }
 
             var ls;
@@ -321,17 +374,17 @@ function activate(context) {
             var st = vscode.window.activeTextEditor.selection.start.line;
             var en = vscode.window.activeTextEditor.selection.end.line;
 
-            if (en == NaN || en <= st) {
+            if(st == en){
+                //nothing selected...run entire program
                 st = 0;
                 en = editor.document.lineCount - 1;
             }
-            else
-                if (en < editor.document.lineCount)
-                    en++;
+            else {
+                vscode.window.showInformationMessage('Only the selected lines are being sent to XRoar');
+            }
 
             var lines = [];
 
-            //build array of old and new line numbers
             for (ls = st; ls <= en; ls++) {
                 let line = editor.document.lineAt(ls);
                 if (line.text.trim().length > 0){
@@ -341,8 +394,8 @@ function activate(context) {
             var lineObj = {
                 lineCollection: lines,
                 incr: 1,
-                prog_st: coco3_start,
-                mem_step: coco3_program_start,
+                prog_st: coco_start,
+                mem_step: coco_program_start,
                 bytes: []
             };
 
@@ -350,9 +403,21 @@ function activate(context) {
 
             let before_read = fs.readFileSync(path.join(tempdir, xroar_snapshot_template));
 
+            // before_read = fs.readFileSync(path.join(tempdir, "mc10_after.snp"));
+
+            // for(let i = 0; i < before_read.length - 2; i++){
+            //     if(before_read[i] == 38 && before_read[i + 1] == 1){
+            //         for(let j = i; j <= i+3; j++){
+            //             console.log(j + " = " + before_read[j]);
+            //         }
+            //         //console.log("Found 38 at " + i);
+            //     }
+            // }
+
             // write loaded snapshot for later use
+            // before_read = fs.readFileSync(path.join(tempdir, "mc10.snp"));
             // require('fs').writeFile(
-            //     'C:/temp/coco3.json',
+            //     'C:/temp/mc10.json',
             //     JSON.stringify(before_read),
 
             //     function (err) {
