@@ -45,7 +45,7 @@
                 "cocotools.xroarPath": {
                     "type": "string",
                     "default": "C:\\Path\\To\\xroar.exe",
-                    "markdownDescription": "Path to the XRoar executable\n\nExamples:\n\n* Windows: C:\\xroar\\xroar.exe\n* Linux: /usr/bin/xroar\n* Mac: /Applications/xroar.app/Contents/MacOS/xroar\n\nSee [https://www.6809.org.uk/xroar](https://www.6809.org.uk/xroar/) for more information on XRoar"
+                    "markdownDescription": "Path to the XRoar executable\n\nExamples:\n\n* Windows: C:\\xroar\\xroar.exe\n* Linux: /usr/bin/xroar\n ***(running 'which xroar' may be useful if you have trouble finding your XRoar installation)***\n* Mac: /Applications/xroar.app/Contents/MacOS/xroar\n\nSee [https://www.6809.org.uk/xroar](https://www.6809.org.uk/xroar/) for more information on XRoar"
                 },
                 "cocotools.tempDirectory": {
                     "type": "string",
@@ -55,7 +55,7 @@
                 "cocotools.xroarSnapshotTemp": {
                     "type": "string",
                     "default": "temp.snp",
-                    "description": "Filename of the temporary snapshot to use when launching xroar (created in xroar directory)"
+                    "description": "Filename of the temporary snapshot to use when launching xroar (created in the temp directory specified above)"
                 },
                 "cocotools.machineType": {
                     "type": "string",

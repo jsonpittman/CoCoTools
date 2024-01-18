@@ -28,8 +28,8 @@ I have tried to simplify the settings from previous versions so that it only inc
 
 ## Other
 
-* This is a work in progress, and there are probably going to be 
-* Currently ONLY supports CoCo3 Disk Extended. Your XRoar installation should have "coco3.rom" and "disk11.rom" available, and be able to be launched like this:
+* This is a work in progress, and there are probably going to be issues that need resolved.
+* Currently works with CoCo 1, 2, and 3, but ONLY supports Disk Extended. To use all three CoCo systems, you should have all appropriate coco and disk roms available to XRoar.
 
 ![](2024-01-07-09-41-02.png)
 
@@ -37,6 +37,10 @@ I have tried to simplify the settings from previous versions so that it only inc
 
 -----------------------------------------------------------------------------------------------------------
 
+### 0.1.6
+
+* Added CoCo 1 & 2 support
+* 
 ### 0.1.0
 
 * Initial release of the updated CoCoTools
