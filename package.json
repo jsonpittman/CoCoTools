@@ -4,7 +4,7 @@
     "author": "Jason Pittman",
     "displayName": "COCOTools",
     "description": "Tools to help you develop in BASIC/C/ASM for the Tandy color Computer in a modern IDE",
-    "version": "0.1.3",
+    "version": "0.1.7",
     "icon": "images/icon.png",
     "repository": "https://github.com/jsonpittman/CoCoTools",
     "engines": {
