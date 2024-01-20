@@ -370,7 +370,7 @@ let BasicReplacements = {
     "ELSE": String.fromCharCode(58, 132),
     "GOSUB": String.fromCharCode(129, 166),
     "GOTO": String.fromCharCode(129, 165),
-    "MID\$": String.fromCharCode(255, 144),
+    "MID\\$": String.fromCharCode(255, 144),
     "TIMER": String.fromCharCode(255, 159),
     "ABS": String.fromCharCode(255, 130),
     "ASC": String.fromCharCode(255, 138),
