@@ -272,6 +272,7 @@ let BasicReplacements = {
     "PCLEAR": String.fromCharCode(192),
     "PCLS": String.fromCharCode(188),
     "PCOPY": String.fromCharCode(199),
+    "PPOINT": String.fromCharCode(255, 160),
     "PLAY": String.fromCharCode(201),
     "PMODE": String.fromCharCode(200),
     "POKE": String.fromCharCode(146),
@@ -395,7 +396,6 @@ let BasicReplacements = {
     "PEEK": String.fromCharCode(255, 134),
     "POINT": String.fromCharCode(255, 145),
     "POS": String.fromCharCode(255, 154),
-    "PPOINT": String.fromCharCode(255, 160),
     "RIGHT\\$": String.fromCharCode(255, 143),
     "RND": String.fromCharCode(255, 132),
     "SGN": String.fromCharCode(255, 128),
@@ -411,7 +411,8 @@ let BasicReplacements = {
     //{"'",string.Format("{0}{1}",(char)58,(char)131),
     "FN": String.fromCharCode(204),
     "DATA": String.fromCharCode(134),
-    "WRITE": String.fromCharCode(217)
+    "WRITE": String.fromCharCode(217),
+    "\\^": String.fromCharCode(175)
 };
 
 function coCoBasicReplace(inStr) {
