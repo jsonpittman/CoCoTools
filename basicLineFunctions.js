@@ -424,6 +424,10 @@ let BasicReplacements = {
 
 function coCoBasicReplace(inStr) {
     let ln = inStr.substring(0, inStr.indexOf(' ')); //save line num
+
+    if (ln == "1000") {
+        console.log("here");
+    }
     inStr = inStr.substring(inStr.indexOf(' ') + 1); //remove line num
 
     if (inStr.trim().length > 0) {
@@ -442,65 +446,43 @@ function coCoBasicReplace(inStr) {
                     quoteSplit[0] = quoteSplit[0] + ":";
                 }
                 for (let qs = 0; qs < quoteSplit.length; qs++) {
-                    let remsplit = quoteSplit[qs].split("REM");
+                    if (!quoteSplit[qs].startsWith("DATA")) {
+                        let remsplit = quoteSplit[qs].split("REM");
 
-                    // if (remsplit.length > 0) {
-                    for (let rs = 0; rs < remsplit.length; rs++) {
-                        let commented_out = false;
-                        let statementsplit = remsplit[0].split(':');
-                        // for (let x = 0; x < statementsplit.length; x++) {
+                        for (let rs = 0; rs < remsplit.length; rs++) {
+                            let commented_out = false;
+                            let statementsplit = remsplit[0].split(':');
 
-                        // if (statementsplit[x].startsWith("REM")) {
-                        //     statementsplit[x] = statementsplit[x].substring(4);
-                        //     statementsplit[x] = String.fromCharCode(130) + " " + statementsplit[x];
-                        //     commented_out = true;
-                        // }
+                            if (!commented_out) {
+                                for (let ss = 0; ss < statementsplit.length; ss++) {
+                                    let indx = statementsplit[ss].indexOf("'");
+                                    if (indx === -1)
+                                        indx = statementsplit[ss].length;
+                                    let match_string = statementsplit[ss].substring(0, indx);
 
-                        // if (statementsplit[x].startsWith("'")) {
-                        //     statementsplit[x] = statementsplit[x].substring(1);
-                        //     statementsplit[x] = String.fromCharCode(131) + statementsplit[x];
-                        //     commented_out = true;
-                        // }
-
-                        if (!commented_out) {
-                            for (let ss = 0; ss < statementsplit.length; ss++) {
-                                let indx = statementsplit[ss].indexOf("'");
-                                if (indx === -1)
-                                    indx = statementsplit[ss].length;
-                                let match_string = statementsplit[ss].substring(0, indx);
-
-                                if (!match_string.startsWith("DATA")) {
                                     for (let keyword in BasicReplacements) {
-                                        //add an exception for "-" in a data statement
-                                        // if (keyword === "\-" && match_string.startsWith("DATA")) {
-                                        //Console.log("skip");
-                                        // } else {
-                                        // if (!match_string.startsWith("DATA")) {
-                                        // console.log("match: " + keyword);
                                         let regex = new RegExp(keyword, 'g');
                                         match_string = match_string.replace(regex, BasicReplacements[keyword]);
-                                        // }
                                     }
+                                    statementsplit[ss] = match_string;
                                 }
-                                else {
-                                    match_string = match_string.replace("DATA", String.fromCharCode(134));
-                                    // console.log("DATA: " + match_string);
-                                }
-                                statementsplit[ss] = match_string;
+
                             }
 
+                            remsplit[rs] = statementsplit.join(':');
                         }
-                        // }
-                        remsplit[rs] = statementsplit.join(':');
+
+                        quoteSplit[qs] = remsplit.join(String.fromCharCode(130));
                     }
+                    else {
+                        //data statement
 
-
-
-                    // }
-                    quoteSplit[qs] = remsplit.join(String.fromCharCode(130));
-
-                    parts[i] = quoteSplit.join(String.fromCharCode(131));
+                        quoteSplit[qs] = quoteSplit[qs].replace("DATA", String.fromCharCode(134));
+                    }
                 }
+
+
+            parts[i] = quoteSplit.join(String.fromCharCode(131));
             }
         }
 
