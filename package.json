@@ -3,8 +3,8 @@
     "publisher": "jasonpittman",
     "author": "Jason Pittman",
     "displayName": "COCOTools",
-    "description": "Tools to help you develop in BASIC/C/ASM for the Tandy color Computer in a modern IDE",
-    "version": "0.1.9",
+    "description": "Tools to help you develop in BASIC for the Tandy color Computer in a modern IDE",
+    "version": "0.1.13",
     "icon": "images/icon.png",
     "repository": "https://github.com/jsonpittman/CoCoTools",
     "engines": {
