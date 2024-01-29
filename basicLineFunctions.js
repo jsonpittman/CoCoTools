@@ -425,9 +425,6 @@ let BasicReplacements = {
 function coCoBasicReplace(inStr) {
     let ln = inStr.substring(0, inStr.indexOf(' ')); //save line num
 
-    if (ln == "1000") {
-        console.log("here");
-    }
     inStr = inStr.substring(inStr.indexOf(' ') + 1); //remove line num
 
     if (inStr.trim().length > 0) {
